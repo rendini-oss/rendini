@@ -1,0 +1,29 @@
+{
+  "[dockerfile]": {
+    "editor.defaultFormatter": "ms-azuretools.vscode-containers"
+  },
+  "[gitignore]": {
+    "editor.defaultFormatter": "foxundermoon.shell-format"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "[starlark]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "files.associations": {
+    "Tiltfile": "starlark",
+    "*.tilt": "starlark"
+  },
+  "markdownlint.config": {
+    "MD030": { "ul_single": 1, "ol_single": 1, "ul_multi": 1, "ol_multi": 1 }
+  },
+  "prettier.printWidth": 100,
+  "prettier.proseWrap": "always",
+  "prettier.tabWidth": 2
+}
