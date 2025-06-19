@@ -1,0 +1,25 @@
+type Query {
+  render(path: String!, params: JSON, context: RenderContextInput): RenderResult!
+  renderMap(namespace: String): [RenderEntry!]!
+}
+
+input RenderContextInput {
+  device: String
+  locale: String
+  userAgent: String
+  preview: Boolean
+}
+
+type RenderResult {
+  content: String! # The rendered output (HTML, Markdown, SVG, etc.)
+  contentType: String! # MIME type of rendered content
+  metadata: JSON # Optional metadata returned by the renderer
+}
+
+type RenderEntry {
+  path: String! # e.g. "/docs/getting-started"
+  params: JSON # Parameters used to resolve this path
+  lastModified: DateTime
+  priority: Float
+  changeFrequency: String # e.g. "daily", "weekly"
+}
