@@ -1,0 +1,16 @@
+{
+  "name": "rendini-renders-vue",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "vue": "^3.5.17"
+  },
+  "engines": {
+    "node": ">=22.16.0"
+  }
+}

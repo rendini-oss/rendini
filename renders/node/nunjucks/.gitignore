@@ -1,6 +1,1 @@
-# These are ignored at the project root to avoid committing accidentally generated files.
-!package.json
-!package-lock.json
-
 dist
-node_modules
