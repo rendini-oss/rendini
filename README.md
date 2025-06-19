@@ -39,14 +39,58 @@ It is **not** the full Rendini platform—just the first stepping stone.
 
 ## 🚀 Quick Start
 
+### Prerequisites
+
+- Install [`git`](https://git-scm.com/downloads) for source control.
+- Install [`gh`, the GitHub CLI](https://cli.github.com/), for GitHub interactions.
+- Install tooling that supports `docker` and `docker compose` for containers. Examples:
+  - Servers and some operating systems can simply install these as utility middleware tools without
+    a "Desktop" bundled installation.
+  - [Rancher Desktop](https://rancherdesktop.io/)
+  - [Podman Desktop](https://podman-desktop.io/)
+  - [Docker Desktop](https://www.docker.com/products/docker-desktop/) _\*May require a paid license
+    in many circumstances._
+- Install [`tilt` for container orchestration](https://tilt.dev/install)
+- Install [GNU `make` for command simplification](https://www.gnu.org/software/make/) _\*Windows
+  users see note._
+
+> [!TIP] Windows with Git BASH
+>
+> Windows users are encouraged to use ["Git for Windows"](https://gitforwindows.org/) with Git BASH
+> and the emulated Mintty, POSIX-compatible terminal. After installing Git BASH, install GNU `make`
+> support by following [this answer](https://stackoverflow.com/a/66525071) (review the guide's
+> comments). This ensures "enough" consistency with \*nix and macOS platforms. While it may be
+> possible to use other `make` alternatives on Windows, this Git BASH integration is the currently
+> known and supported solution.
+
+### Running Rendini
+
+In the future, explicit "Contributor" steps will be separated from how to use Rendini.
+
+1. Open a POSIX-compatible terminal.
+2. Navigate to a file system directory to store the Rendini project code.
+3. Execute the following commands:
+
 ```bash
-gh repo clone https://github.com/your-org/rendini-nunjucks -- --depth=1
+gh repo clone rendini-oss/rendini -- --depth=1
 # Or...
-# git clone https://github.com/your-org/rendini-nunjucks.git --depth=1
+# git clone https://github.com/rendini-oss/rendini.git --depth=1
+cd rendini
 make # Install the system.
 # Or...
-# make up # Start the system.
+# make dev # Start the system.
 ```
+
+#### Running Rendini in VS Code
+
+1. Open a blank project window and the terminal.
+2. Navigate to a file system directory to store the Rendini project code.
+3. Clone the repository with the command `gh repo clone rendini-oss/rendini -- --depth=1`
+4. Install the recommended extensions.
+5. Install Rendini with the command `make`.
+6. Start Rendini with the command `make dev`.
+7. Experiment with the VS Code command pallette by using the command "Makefile: Clean and build the
+   target ALL".
 
 ---
 

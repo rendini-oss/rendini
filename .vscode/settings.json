@@ -7,10 +7,6 @@
   "[gitignore]": {
     "editor.defaultFormatter": "foxundermoon.shell-format"
   },
-  "[makefile]": {
-    "editor.insertSpaces": false,
-    "editor.tabSize": 4
-  },
   "[markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -41,5 +37,7 @@
   },
   "prettier.printWidth": 100,
   "prettier.proseWrap": "always",
-  "prettier.tabWidth": 2
+  "prettier.tabWidth": 2,
+  "makefile.makePath": "C:\\Program Files\\Git\\mingw64\\bin\\make.exe",
+  "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools"
 }
