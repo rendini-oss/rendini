@@ -1,9 +1,15 @@
 {
   "[dockerfile]": {
-    "editor.defaultFormatter": "ms-azuretools.vscode-containers"
+    "editor.defaultFormatter": "ms-azuretools.vscode-containers",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 4
   },
   "[gitignore]": {
     "editor.defaultFormatter": "foxundermoon.shell-format"
+  },
+  "[makefile]": {
+    "editor.insertSpaces": false,
+    "editor.tabSize": 4
   },
   "[markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -11,12 +17,22 @@
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter"
   },
+  "[shellscript]": {
+    "editor.defaultFormatter": "foxundermoon.shell-format"
+  },
   "[starlark]": {
     "editor.defaultFormatter": "ms-python.black-formatter"
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.formatOnType": true,
+  "editorconfig.generateAuto": true,
+  "editor.detectIndentation": false,
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
   "files.associations": {
+    "containerfile": "dockerfile",
     "Tiltfile": "starlark",
     "*.tilt": "starlark"
   },

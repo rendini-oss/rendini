@@ -1,0 +1,12 @@
+services:
+  nunjucks-renderer:
+    image: localhost/rendini/nunjucks-renderer:latest
+    container_name: rendini-nunjucks-renderer
+    ports:
+      - '3000:3000'
+    tty: true
+    stdin_open: true
+    restart: 'no'
+    # Removes container when stopped (similar to --rm flag)
+    labels:
+      - 'com.docker.compose.rm=true'

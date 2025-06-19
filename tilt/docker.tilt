@@ -1,0 +1,66 @@
+def __bake(
+  file_name="./container-bake.hcl",
+  resource_name="",
+):
+  """Creates a factory method for building resources for docker buildx bake commands.
+
+  Args:
+    file_name: Name of the file containing the docker buildx bake configuration.
+      Defaults to "./container-bake.hcl".
+    resource_name: Name of the local_resource to create. If not provided, defaults to "docker-bake".
+
+  Returns:
+    A struct with methods for configuring and executing the docker buildx bake command.
+  """
+
+  __file_dependencies = []
+  __ignore_file_dependencies = []
+  __resource_dependencies = []
+  __resource_labels = []
+
+  def _add_file_dependencies(*file_dependencies):
+    __file_dependencies.extend(file_dependencies)
+    return self
+
+  def _add_ignore_file_dependencies(*ignore_file_dependencies):
+    __ignore_file_dependencies.extend(ignore_file_dependencies)
+    return self
+
+  def _add_resource_dependencies(*resource_dependencies):
+    __resource_dependencies.extend(resource_dependencies)
+    return self
+
+  def _add_resource_labels(*resource_labels):
+    __resource_labels.extend(resource_labels)
+    return self
+
+  def _create_resource():
+    full_command = "docker buildx bake --file %s" % file_name
+
+    local_resource_name = resource_name
+
+    if not local_resource_name or len(local_resource_name) == 0:
+      local_resource_name = "docker-bake"
+
+    local_resource(
+      name=local_resource_name,
+      cmd=full_command,
+      deps=__file_dependencies,
+      dir=".",
+      ignore=__ignore_file_dependencies,
+      resource_deps=__resource_dependencies,
+    )
+
+  self = struct(
+    add_file_dependencies=_add_file_dependencies,
+    add_ignore_file_dependencies=_add_ignore_file_dependencies,
+    add_resource_dependencies=_add_resource_dependencies,
+    add_resource_labels=_add_resource_labels,
+    create_resource=_create_resource,
+  )
+
+  return self
+
+docker_factory = struct(
+  bake=__bake,
+)

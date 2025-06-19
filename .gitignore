@@ -1,1 +1,8 @@
 GITHUB_TOKEN
+
+node_modules
+
+# Ignore package files in the root. They don't belong.
+# These can get created if a developer runs `npm init` or even `npm install`.
+package-lock.json
+package.json
