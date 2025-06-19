@@ -6,10 +6,6 @@ import nunjucks from 'nunjucks';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { createHandler } from 'graphql-http/lib/use/express';
-import { buildSchema } from 'graphql';
-import typeDefs from './graphql/schema.js';
-import resolvers from './graphql/resolvers.js';
 
 // Get the directory name using ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -52,19 +48,18 @@ interface RenderRequest {
 }
 
 // Health check endpoint for Kubernetes readiness probe
-app.get('/healthz', (req, res) => {
+app.get('/healthz', (req: express.Request, res: express.Response) => {
   res.status(200).send('ok');
 });
 
 // API endpoint to list all available render targets (template names)
-app.get('/api/render-targets', (req, res) => {
+app.get('/api/render-targets', (req: express.Request, res: express.Response) => {
   try {
     // Read all .njk files from the pages directory
     const files = fs
       .readdirSync(templatesPath)
       .filter(file => file.endsWith('.njk'))
-      .map(file => file.replace('.njk', ''));
-
+      .map(file => ({ name: file.replace('.njk', ''), template: file }));
     res.json(files);
   } catch (error) {
     console.error('Error listing render targets:', error);
@@ -73,7 +68,7 @@ app.get('/api/render-targets', (req, res) => {
 });
 
 // API endpoint to render a template with provided data
-app.post('/api/render', (req, res) => {
+app.post('/api/render', (req: express.Request, res: express.Response) => {
   try {
     const { name, data } = req.body as RenderRequest;
 
@@ -97,32 +92,7 @@ app.post('/api/render', (req, res) => {
   }
 });
 
-// Start the server
-// Set up GraphQL middleware
-const schema = buildSchema(typeDefs);
-
-// Create root value with resolvers
-const root = {
-  renderTargets: resolvers.renderTargets,
-  render: resolvers.render,
-};
-
-// Use the graphql-http middleware for handling GraphQL requests
-app.use(
-  '/graphql',
-  createHandler({
-    schema,
-    rootValue: root,
-  })
-);
-
-// Serve the static HTML file ./graphiql/index.html
-app.get('/graphiql', (req, res) => {
-  res.sendFile(path.join(__dirname, 'graphiql', 'index.html'));
-});
-
 app.listen(port, () => {
-  console.log(`🚀 Rendini server running at http://localhost:${port}`);
-  console.log(`📊 GraphQL API available at http://localhost:${port}/graphql`);
-  console.log(`🔍 GraphiQL interface at http://localhost:${port}/graphiql`);
+  console.log(`🚀 Rendini Nunjucks Renderer running at http://localhost:${port}`);
+  console.log(`📃 Available templates at http://localhost:${port}/api/render-targets`);
 });

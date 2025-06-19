@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import nunjucks from 'nunjucks';
-import GraphQLJSON from 'graphql-type-json';
 import { fileURLToPath } from 'url';
 
 // Get the directory name using ES modules
@@ -44,18 +43,7 @@ function listTemplates(): RenderTarget[] {
     .map(f => ({ name: f.replace(/\.njk$/, ''), template: f }));
 }
 
-// graphql-http compatible resolvers
-const resolvers = {
-  // For scalar JSON type
-  JSON: GraphQLJSON,
-
-  // Root resolvers
-  renderTargets: (): RenderTarget[] => listTemplates(),
-  render: ({ name, data }: RenderArgs): RenderResult => {
-    const template = `${name}.njk`;
-    const html = nunjucks.render(template, data || {});
-    return { name, html };
-  },
-};
-
+// REMOVE: GraphQL resolvers, as these are now handled by the stand-alone API
+// Keep this empty file for backward compatibility
+const resolvers = {};
 export default resolvers;

@@ -8,14 +8,12 @@
     "build": "tsc && npm run copy-static",
     "copy-static": "copyfiles -u 1 \"graphiql/**/*\" dist/graphiql",
     "start": "node dist/server.js",
-    "dev": "ts-node-esm server.ts"
+    "dev": "tsc && cross-env PORT=3001 nodemon dist/server.js",
+    "watch": "tsc -w"
   },
   "dependencies": {
     "express": "^4.18.2",
     "graphiql": "^3.1.1",
-    "graphql": "^15.8.0",
-    "graphql-http": "^1.22.4",
-    "graphql-type-json": "^0.3.2",
     "nunjucks": "^3.2.4"
   },
   "devDependencies": {
@@ -25,7 +23,9 @@
     "copyfiles": "^2.4.1",
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "nodemon": "^3.0.1",
+    "cross-env": "^7.0.3"
   },
   "engines": {
     "node": ">=22.16.0"

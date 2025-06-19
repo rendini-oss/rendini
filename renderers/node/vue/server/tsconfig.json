@@ -4,16 +4,12 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "esModuleInterop": true,
-    "sourceMap": true,
-    "outDir": "./dist",
+    "outDir": "dist",
+    "rootDir": "src",
     "strict": true,
-    "noImplicitAny": true,
     "skipLibCheck": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["**/*.ts"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
