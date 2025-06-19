@@ -61,7 +61,11 @@ It is **not** the full Rendini platform—just the first stepping stone.
 > support by following [this answer](https://stackoverflow.com/a/66525071) (review the guide's
 > comments). This ensures "enough" consistency with \*nix and macOS platforms. While it may be
 > possible to use other `make` alternatives on Windows, this Git BASH integration is the currently
-> known and supported solution.
+> known and supported solution. After installing, the path to `make` (e.g. C:\Program
+> Files\Git\mingw64\bin\make.exe) must either be registered on the system "PATH" environment
+> variable or it can be entered into the settings for the VS Code extension "Makefile Tools" under
+> the "Makefile: Make Path" setting for the user. _\*This system-specific path should not be set as
+> a workspace setting for this project._
 
 ### Running Rendini
 
@@ -87,10 +91,19 @@ make # Install the system.
 2. Navigate to a file system directory to store the Rendini project code.
 3. Clone the repository with the command `gh repo clone rendini-oss/rendini -- --depth=1`
 4. Install the recommended extensions.
-5. Install Rendini with the command `make`.
+5. Build Rendini with several options:
+   - Use the VS Code keyboard shortcut <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> on Windows
+     or <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> on macOS to build.
+   - Use the command `make`.
+   - Open the VS Code command pallette and run the command "Makefile: Clean and build the target
+     ALL".
 6. Start Rendini with the command `make dev`.
-7. Experiment with the VS Code command pallette by using the command "Makefile: Clean and build the
-   target ALL".
+7. Review the "./makefile" used by GNU `make` targets to better understand and triage native command
+   interactions run by developers and automation servers (e.g. Continuous Integration on GitHub
+   Actions).
+8. Review the "./tiltfile" (and loaded extensions) used by `tilt` to better understand and triage
+   native command and container orchestration run by developers and automation servers (e.g.
+   Continuous Integration on GitHub Actions).
 
 ---
 
