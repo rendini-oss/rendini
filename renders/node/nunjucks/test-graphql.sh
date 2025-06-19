@@ -1,7 +1,7 @@
 #!/bin/bash
 # GraphQL API test script for Rendini
 
-echo "Testing GraphQL API..."
+echo "Testing Rendini Nunjucks Render API..."
 
 echo -e "\nGetting all render targets:"
 curl -s -X POST "http://localhost:3000/graphql" \
