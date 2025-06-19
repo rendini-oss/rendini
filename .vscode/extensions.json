@@ -6,6 +6,7 @@
     "mads-hartmann.bash-ide-vscode",
     "ms-azuretools.vscode-containers",
     "ms-python.black-formatter",
-    "ms-vscode.makefile-tools"
+    "ms-vscode.makefile-tools",
+    "Vue.volar"
   ]
 }
