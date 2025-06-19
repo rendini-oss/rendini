@@ -1,5 +1,6 @@
 GITHUB_TOKEN
 
+dist
 node_modules
 
 # Ignore package files in the root. They don't belong.

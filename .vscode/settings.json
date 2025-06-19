@@ -35,8 +35,18 @@
   },
   "files.associations": {
     "containerfile": "dockerfile",
+    ".env*": "dotenv",
     "Tiltfile": "starlark",
     "*.tilt": "starlark"
+  },
+  "files.exclude": {
+    ".git": true,
+    "dist": true,
+    "node_modules": true
+  },
+  "github.copilot.enable": {
+    "*": true,
+    "dotenv": false
   },
   "markdownlint.config": {
     "MD030": { "ul_single": 1, "ol_single": 1, "ul_multi": 1, "ol_multi": 1 }
@@ -44,5 +54,6 @@
   "prettier.printWidth": 100,
   "prettier.proseWrap": "always",
   "prettier.tabWidth": 2,
+  "python.analysis.exclude": ["**/node_modules", "**/dist", "**/.venv", "**/.env*"],
   "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools"
 }

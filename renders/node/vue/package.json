@@ -4,11 +4,16 @@
   "type": "module",
   "license": "Apache-2.0",
   "scripts": {
-    "start": "node server.js"
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/server.js",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean"
   },
   "dependencies": {
     "express": "^5.1.0",
     "graphiql": "^4.1.2",
+    "graphql": "^16.11.0",
     "vue": "^3.5.17"
   },
   "engines": {
@@ -16,6 +21,9 @@
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
-    "@types/node": "^24.0.3"
+    "@types/node": "^24.0.3",
+    "typescript": "^5.4.2",
+    "rimraf": "^5.0.5",
+    "@vue/tsconfig": "^0.5.1"
   }
 }
