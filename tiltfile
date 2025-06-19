@@ -5,7 +5,7 @@ def main():
     docker_factory.bake()
     .add_file_dependencies(
       "container-bake.hcl",
-      "renderers",
+      "renders",
       "./Tiltfile",
     )
   )

@@ -7,7 +7,7 @@ target "nunjucks-renderer" {
     args = {
         IMAGE_ID = "docker.io/library/node:${NODE_TAG}"
     }
-    context = "./renderers/node/nunjucks"
+    context = "./renders/node/nunjucks"
     dockerfile = "./containerfile"
     tags = ["localhost/rendini/nunjucks-renderer:latest"]
 }

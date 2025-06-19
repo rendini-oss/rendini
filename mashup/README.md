@@ -18,7 +18,7 @@ npm run start
 
 - Access GraphQL at: http://localhost:3000/graphql
 
-## Registering Renderers
+## Registering Render APIs
 
 The API expects each renderer service to expose:
 

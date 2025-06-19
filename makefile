@@ -34,11 +34,11 @@ stop:
 .PHONY: clean
 clean: stop
 	@echo "Cleaning Rendini..."
-	@rm --recursive --force ./renderers/node/nunjucks/dist
+	@rm --recursive --force ./renders/node/nunjucks/dist
 	@echo "Successfully cleaned Rendini."
 
 .PHONY: reset
 reset: clean
 	@echo "Resetting Rendini..."
-	@rm --recursive --force ./renderers/node/nunjucks/node_modules
+	@rm --recursive --force ./renders/node/nunjucks/node_modules
 	@echo "Successfully reset Rendini."

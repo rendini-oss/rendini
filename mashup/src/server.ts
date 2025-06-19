@@ -6,7 +6,7 @@ import fetch from 'node-fetch';
 import { RenderTarget, RenderRequest, RenderResult } from './types.js';
 
 // Configurable renderer endpoints
-const RENDERERS = [
+const RENDERS = [
   { name: 'nunjucks', url: process.env.NUNJUCKS_RENDERER_URL || 'http://localhost:3001' },
   { name: 'vue', url: process.env.VUE_RENDERER_URL || 'http://localhost:3002' },
 ];
@@ -71,10 +71,10 @@ const JSONScalar = new GraphQLScalarType({
   parseLiteral,
 });
 
-// Helper to aggregate render targets from all renderers
+// Helper to aggregate render targets from all renders
 async function getAllRenderTargets(): Promise<RenderTarget[]> {
   const results = await Promise.all(
-    RENDERERS.map(async renderer => {
+    RENDERS.map(async renderer => {
       try {
         const res = await fetch(`${renderer.url}/api/render-targets`);
         if (!res.ok) return [];
@@ -92,7 +92,7 @@ async function getAllRenderTargets(): Promise<RenderTarget[]> {
 // Helper to proxy render call to the correct renderer
 async function renderTemplate(args: RenderRequest): Promise<RenderResult> {
   const { name, data, renderer } = args;
-  const r = RENDERERS.find(r => r.name === renderer);
+  const r = RENDERS.find(r => r.name === renderer);
   if (!r) throw new Error(`Renderer not found: ${renderer}`);
 
   try {
