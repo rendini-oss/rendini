@@ -44,6 +44,7 @@
     "dist": true,
     "node_modules": true
   },
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
   "github.copilot.enable": {
     "*": true,
     "dotenv": false

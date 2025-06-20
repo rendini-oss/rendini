@@ -1,4 +1,6 @@
-// rendini-api/src/server.ts
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) 2025 Rendini Labs
+
 import express from 'express';
 import { graphqlHTTP } from 'express-graphql';
 import { buildSchema, GraphQLScalarType } from 'graphql';
@@ -22,9 +24,21 @@ const schema = buildSchema(`
     html: String!
   }
   type Query {
+    """
+    API version 1
+    """
+    v1: V1Query
+  }
+  type V1Query {
     renderTargets: [RenderTarget!]!
   }
   type Mutation {
+    """
+    API version 1
+    """
+    v1: V1Mutation
+  }
+  type V1Mutation {
     render(name: String!, data: JSON, renderer: String!): RenderResult!
   }
   scalar JSON
@@ -63,6 +77,9 @@ function parseLiteral(ast: any): any {
   }
 }
 
+/**
+ * JSON scalar implementation for GraphQL
+ */
 const JSONScalar = new GraphQLScalarType({
   name: 'JSON',
   description: 'Arbitrary JSON',
@@ -71,7 +88,10 @@ const JSONScalar = new GraphQLScalarType({
   parseLiteral,
 });
 
-// Helper to aggregate render targets from all renders
+/**
+ * Helper to aggregate render targets from all renders
+ * @returns A promise that resolves to an array of RenderTarget objects
+ */
 async function getAllRenderTargets(): Promise<RenderTarget[]> {
   const results = await Promise.all(
     RENDERS.map(async renderer => {
@@ -89,7 +109,11 @@ async function getAllRenderTargets(): Promise<RenderTarget[]> {
   return results.flat();
 }
 
-// Helper to proxy render call to the correct renderer
+/**
+ * Helper to proxy render call to the correct renderer
+ * @param args The render request parameters
+ * @returns A promise that resolves to a RenderResult
+ */
 async function renderTemplate(args: RenderRequest): Promise<RenderResult> {
   const { name, data, renderer } = args;
   const r = RENDERS.find(r => r.name === renderer);
@@ -114,9 +138,18 @@ async function renderTemplate(args: RenderRequest): Promise<RenderResult> {
   }
 }
 
+/**
+ * Root resolver for the GraphQL schema
+ */
 const root = {
-  renderTargets: getAllRenderTargets,
-  render: renderTemplate,
+  v1: {
+    renderTargets: getAllRenderTargets,
+  },
+  Mutation: {
+    v1: {
+      render: renderTemplate,
+    },
+  },
   JSON: JSONScalar,
 };
 

@@ -1,35 +1,43 @@
-import { createApp } from '../app.js';
-import { renderToString } from 'vue/server-renderer';
-import type { RenderContextInput, RenderResult, RenderEntry, JSON } from '../types.js';
-import { GraphQLScalarType } from 'graphql';
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) 2025 Rendini Labs
 
-// Define scalar types
+import { createApp } from "../app.js";
+import { renderToString } from "vue/server-renderer";
+import type { RenderContextInput, RenderResult, RenderEntry, JSON } from "../types.js";
+import { GraphQLScalarType } from "graphql";
+
+/**
+ * DateTime scalar type for GraphQL
+ */
 export const dateTimeScalar = new GraphQLScalarType({
-  name: 'DateTime',
-  description: 'DateTime custom scalar type',
+  name: "DateTime",
+  description: "DateTime custom scalar type",
   serialize(value: unknown): string {
     if (value instanceof Date) {
       return value.toISOString(); // Convert outgoing Date to ISO string
     }
-    throw Error('DateTime scalar serialization error: expected Date object');
+    throw Error("DateTime scalar serialization error: expected Date object");
   },
   parseValue(value: unknown): Date {
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       return new Date(value); // Convert incoming string to Date
     }
-    throw new Error('DateTime scalar parse error: invalid input');
+    throw new Error("DateTime scalar parse error: invalid input");
   },
   parseLiteral(ast: any): Date {
-    if (ast.kind === 'StringValue') {
+    if (ast.kind === "StringValue") {
       return new Date(ast.value);
     }
-    throw new Error('DateTime scalar parse error: invalid AST');
+    throw new Error("DateTime scalar parse error: invalid AST");
   },
 });
 
+/**
+ * JSON scalar type for GraphQL
+ */
 export const jsonScalar = new GraphQLScalarType({
-  name: 'JSON',
-  description: 'JSON custom scalar type',
+  name: "JSON",
+  description: "JSON custom scalar type",
   serialize(value: unknown): unknown {
     return value; // Pass through, GraphQL.js will validate
   },
@@ -81,35 +89,40 @@ const renderEntries: RenderEntry[] = [
   },
 ];
 
+/**
+ * Resolvers for the GraphQL schema
+ */
 export const resolvers = {
   // Scalar resolvers
   JSON: jsonScalar,
   DateTime: dateTimeScalar,
 
-  // Query resolvers
-  render: async ({
-    path,
-    params,
-    context,
-  }: {
-    path: string;
-    params?: JSON;
-    context?: RenderContextInput;
-  }): Promise<RenderResult> => {
-    try {
-      if (path !== '/default') {
-        throw new Error(`Template '${path}' not found`);
-      }
+  // Root Query resolvers
+  v1: {
+    // Query resolvers
+    render: async ({
+      path,
+      params,
+      context,
+    }: {
+      path: string;
+      params?: JSON;
+      context?: RenderContextInput;
+    }): Promise<RenderResult> => {
+      try {
+        if (path !== "/default") {
+          throw new Error(`Template '${path}' not found`);
+        }
 
-      // Create Vue app
-      const app = createApp();
-      const html = await renderToString(app);
+        // Create Vue app
+        const app = createApp();
+        const html = await renderToString(app);
 
-      // Generate full HTML with client-side hydration
-      const content = `
-        <!DOCTYPE html>
-        <html>
-          <head>
+        // Generate full HTML with client-side hydration
+        const content = `
+          <!DOCTYPE html>
+          <html>
+            <head>
             <title>Vue SSR Example</title>
             <script type="importmap">
               {
@@ -148,5 +161,5 @@ export const resolvers = {
     }
 
     return renderEntries;
-  },
+  }
 };

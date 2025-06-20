@@ -1,4 +1,11 @@
 type Query {
+  """
+  API version 1
+  """
+  v1: V1Query
+}
+
+type V1Query {
   renderAll(query: RenderQueryInput!): [RenderResult!]!
   renderSitemap(filter: SitemapFilter): SitemapOutput!
   renderIndex: [RenderIndexEntry!]!

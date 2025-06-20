@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) 2025 Rendini Labs
+
 import fs from 'fs';
 import path from 'path';
 import nunjucks from 'nunjucks';
@@ -15,7 +18,9 @@ const PAGES_ROOT = fs.existsSync(path.join(__dirname, '../pages'))
   ? path.join(__dirname, '../pages')
   : path.join(__dirname, '../../pages');
 
-// Define scalar types
+/**
+ * DateTime scalar type for GraphQL
+ */
 export const dateTimeScalar = new GraphQLScalarType({
   name: 'DateTime',
   description: 'DateTime custom scalar type',
@@ -115,51 +120,57 @@ function getTemplates(namespace?: string): RenderEntry[] {
   }
 }
 
+/**
+ * Resolvers for the GraphQL schema
+ */
 export const resolvers = {
   // Scalar resolvers
   JSON: jsonScalar,
   DateTime: dateTimeScalar,
 
-  // Query resolvers
-  render: async ({
-    path,
-    params,
-    context,
-  }: {
-    path: string;
-    params?: JSON;
-    context?: RenderContextInput;
-  }): Promise<RenderResult> => {
-    try {
-      // Remove leading slash if present
-      const templateName = path.startsWith('/') ? path.substring(1) : path;
+  // Root Query resolvers
+  v1: {
+    // Query resolvers
+    render: async ({
+      path,
+      params,
+      context,
+    }: {
+      path: string;
+      params?: JSON;
+      context?: RenderContextInput;
+    }): Promise<RenderResult> => {
+      try {
+        // Remove leading slash if present
+        const templateName = path.startsWith('/') ? path.substring(1) : path;
 
-      // Check if the requested template exists
-      const templatePath = `${PAGES_ROOT}/${templateName}.njk`;
-      if (!fs.existsSync(templatePath)) {
-        throw new Error(`Template '${templateName}' not found`);
+        // Check if the requested template exists
+        const templatePath = `${PAGES_ROOT}/${templateName}.njk`;
+        if (!fs.existsSync(templatePath)) {
+          throw new Error(`Template '${templateName}' not found`);
+        }
+
+        // Render the template with the provided data
+        const content = nunjucks.render(`${templateName}.njk`, params || {});
+
+        return {
+          content,
+          contentType: 'text/html',
+          metadata: {
+            renderedWith: 'nunjucks',
+            templateName,
+            context,
+            params,
+          },
+        };
+      } catch (error) {
+        console.error('Error rendering template:', error);
+        throw error;
       }
+    },
 
-      // Render the template with the provided data
-      const content = nunjucks.render(`${templateName}.njk`, params || {});
-
-      return {
-        content,
-        contentType: 'text/html',
-        metadata: {
-          renderedWith: 'nunjucks',
-          templateName,
-          context,
-          params,
-        },
-      };
-    } catch (error) {
-      console.error('Error rendering template:', error);
-      throw error;
-    }
-  },
-
-  renderMap: ({ namespace }: { namespace?: string }): RenderEntry[] => {
-    return getTemplates(namespace);
+    renderMap: ({ namespace }: { namespace?: string }): RenderEntry[] => {
+      return getTemplates(namespace);
+    },
   },
 };

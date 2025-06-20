@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) 2025 Rendini Labs
+
 import express from 'express';
 import type { RequestHandler } from 'express';
 import { createServer } from 'http';
@@ -22,7 +25,9 @@ server.use(cors());
 // Serve static files
 server.use(express.static('.'));
 
-// Health check endpoint for Kubernetes readiness probe
+/**
+ * Health check endpoint for Kubernetes readiness probe
+ */
 const healthCheck: RequestHandler = (_req, res) => {
   res.status(200).send('ok');
 };

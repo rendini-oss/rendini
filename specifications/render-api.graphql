@@ -1,4 +1,11 @@
 type Query {
+  """
+  API version 1
+  """
+  v1: V1Query
+}
+
+type V1Query {
   render(path: String!, params: JSON, context: RenderContextInput): RenderResult!
   renderMap(namespace: String): [RenderEntry!]!
 }

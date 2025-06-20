@@ -1,4 +1,5 @@
-// server.ts - Express server with Nunjucks templating and GraphQL API
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) 2025 Rendini Labs
 
 import express from 'express';
 import type { RequestHandler } from 'express';
