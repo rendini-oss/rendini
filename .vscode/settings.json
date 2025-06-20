@@ -29,9 +29,15 @@
   "editor.tabSize": 2,
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.patterns": {
+    "settings.json": "extensions.json",
+    "tasks.json": "extensions.json, settings.json",
+    "container-compose.yaml": "container-bake.hcl",
+    "LICENSE": "CONTRIBUTOR_LICENSE_AGREEMENT.md, GOVERNANCE.md, TRADEMARKS.md",
+    "*.svg": "*.png",
+    "makefile": "package*.json, tiltfile, .env*",
     "tsconfig.json": "tsconfig.*.json, env.d.ts",
     "vite.config.*": "jsconfig*, vitest.config.*, cypress.config.*, playwright.config.*",
-    "package.json": "package-lock.json, pnpm*, .yarnrc*, yarn*, .eslint*, eslint*, .oxlint*, oxlint*, .prettier*, prettier*, .editorconfig"
+    "package.json": "package-lock.json, pnpm*, .yarnrc*, yarn*, .eslint*, eslint*, .oxlint*, oxlint*, .prettier*, prettier*, .editorconfig, .markdownlint.json, .node-version"
   },
   "files.associations": {
     "containerfile": "dockerfile",
