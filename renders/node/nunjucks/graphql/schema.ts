@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2025 Rendini Labs
 
-import { buildSchema } from 'graphql';
+import { buildSchema } from "graphql";
 
 /**
  * Defines the GraphQL schema for the Rendini Render API
@@ -32,7 +32,7 @@ const schemaString = `
   type RenderResult {
     content: String! # The rendered output (HTML, Markdown, SVG, etc.)
     contentType: String! # MIME type of rendered content
-    metadata: JSON # Optional metadata returned by the renderer
+    metadata: JSON # Optional metadata returned by the source
   }
 
   type RenderEntry {

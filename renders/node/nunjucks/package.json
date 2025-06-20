@@ -1,5 +1,5 @@
 {
-  "name": "rendini-renders-nunjucks",
+  "name": "rendini-render-nunjucks",
   "version": "0.1.0",
   "main": "dist/server.js",
   "type": "module",

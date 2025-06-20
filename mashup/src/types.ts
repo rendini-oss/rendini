@@ -2,12 +2,12 @@
 // Copyright (c) 2025 Rendini Labs
 
 /**
- * Represents a render target with name, template, and renderer information
+ * Represents a render target with name, template, and rendering information
  */
 export interface RenderTarget {
   name: string;
   template: string;
-  renderer: string;
+  source: string;
 }
 
 /**
@@ -16,7 +16,7 @@ export interface RenderTarget {
 export interface RenderRequest {
   name: string;
   data?: Record<string, any>;
-  renderer: string;
+  source: string;
 }
 
 /**

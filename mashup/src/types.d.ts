@@ -6,12 +6,12 @@
  */
 
 /**
- * Represents a render target with name, template, and renderer information
+ * Represents a render target with name, template, and rendering information
  */
 export type RenderTarget = {
   name: string;
   template: string;
-  renderer: string;
+  source: string;
 };
 
 /**

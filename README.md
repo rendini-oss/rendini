@@ -14,20 +14,20 @@
 
 Rendini’s mission is to make rendering **portable, predictable, and performant**:
 
-| Challenge                                     | Rendini Solution                                                       |
-| --------------------------------------------- | ---------------------------------------------------------------------- |
-| Mixed tech stacks (React, Vue, Svelte…)       | Framework‑agnostic component contracts & pluggable renderer strategies |
-| Multiple render moments (build, edge, client) | Declarative “render anywhere” lifecycle                                |
-| Slow iteration, fragmented infra              | Single registry + API for discovery, composition, and delivery         |
+| Challenge                                     | Rendini Solution                                                     |
+| --------------------------------------------- | -------------------------------------------------------------------- |
+| Mixed tech stacks (React, Vue, Svelte…)       | Framework‑agnostic component contracts & pluggable render strategies |
+| Multiple render moments (build, edge, client) | Declarative “render anywhere” lifecycle                              |
+| Slow iteration, fragmented infra              | Single registry + API for discovery, composition, and delivery       |
 
 > **Status (α‑preview)** – Active R&D. Core spec drafts, APIs, and proofs‑of‑technology (PoTs) are
 > evolving rapidly. See the [Roadmap](#-roadmap).
 
 ---
 
-## 🚧 Proof‑of‑Technology (PoT): Nunjucks Renderer
+## 🚧 Proof‑of‑Technology (PoT): Render Nunjucks
 
-The **Rendini Nunjucks Renderer** demonstrates:
+The **Rendini Render Nunjucks** demonstrates:
 
 - Automatic discovery of `*.njk` page templates in `src/pages/`
 - REST and GraphQL endpoints for listing and rendering pages

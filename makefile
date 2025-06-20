@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2025 Rendini Labs.
+
 .DEFAULT_GOAL:=all
 
 all: install
