@@ -3,23 +3,28 @@
 
 echo "Testing Rendini Vue Render API..."
 
-echo -e "\nGetting all render targets:"
-curl -s -X GET "http://localhost:3000/api/render-targets" \
-  -H "Content-Type: application/json"
+echo -e "\nQuery 0: Rendering GraphiQL"
+curl -s -X GET "http://localhost:3000/graphiql"
 
-echo -e "\n\nRendering default template with data:"
-curl -s -X POST "http://localhost:3000/api/render" \
+echo -e "\n\nQuery 1: Rendering default template:"
+curl -s -X POST "http://localhost:3000/graphql" \
   -H "Content-Type: application/json" \
-  -d '{"name":"default"}'
+  -d '{
+    "query": "query { render(path: \"/default\") { content contentType metadata } }"
+  }' | jq '.'
 
-# echo -e "\nGetting all render targets:"
-# curl -s -X POST "http://localhost:3000/graphql" \
-#   -H "Content-Type: application/json" \
-#   -d '{"query":"{ renderTargets { name template } }"}'
+echo -e "\n\nQuery 2: Getting render map:"
+curl -s -X POST "http://localhost:3000/graphql" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "query { renderMap { path priority changeFrequency lastModified } }"
+  }' | jq '.'
 
-# echo -e "\n\nRendering home template with data:"
-# curl -s -X POST "http://localhost:3000/graphql" \
-#   -H "Content-Type: application/json" \
-#   -d '{"query":"mutation { render(name: \"home\", data: {title: \"Welcome to Rendini\", user: \"GraphQL User\"}) { name html } }"}'
+echo -e "\n\nQuery 3: Rendering with context parameters:"
+curl -s -X POST "http://localhost:3000/graphql" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "query { render(path: \"/default\", context: { device: \"mobile\", locale: \"en-US\", preview: true }) { contentType metadata } }"
+  }' | jq '.'
 
 echo -e "\n"

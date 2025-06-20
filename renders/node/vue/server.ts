@@ -1,13 +1,26 @@
 import express from 'express';
-import type { Request, Response, RequestHandler } from 'express';
-import { renderToString } from 'vue/server-renderer';
-import { createApp } from './app.js';
-import type { RenderTarget, RenderRequest, ErrorResponse } from './types.js';
+import type { RequestHandler } from 'express';
+import { createServer } from 'http';
+import { graphql } from 'graphql';
+import cors from 'cors';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { schema } from './graphql/schema.js';
+import { resolvers } from './graphql/resolvers.js';
+
+// Get __dirname equivalent in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const server = express();
 
-// Configure Express to parse JSON bodies
+// Configure middleware
 server.use(express.json());
+server.use(cors());
+
+// Serve static files
+server.use(express.static('.'));
 
 // Health check endpoint for Kubernetes readiness probe
 const healthCheck: RequestHandler = (_req, res) => {
@@ -15,97 +28,100 @@ const healthCheck: RequestHandler = (_req, res) => {
 };
 server.get('/healthz', healthCheck);
 
-// API endpoint to list all available render targets (template names)
-const listRenderTargets: RequestHandler<{}, RenderTarget[] | ErrorResponse> = (_req, res) => {
+// GraphQL endpoint
+server.post('/graphql', async (req, res) => {
+  const { query, variables, operationName } = req.body;
   try {
-    res.json([{ name: 'default', description: 'Default render target' }]);
+    const result = await graphql({
+      schema,
+      source: query,
+      rootValue: resolvers,
+      variableValues: variables,
+      operationName,
+    });
+    res.json(result);
   } catch (error) {
-    console.error('Error listing render targets:', error);
-    res.status(500).json({ error: 'Failed to list render targets' });
+    console.error('GraphQL Error:', error);
+    res.status(500).json({ errors: [{ message: 'Internal server error' }] });
   }
-};
-server.get('/api/render-targets', listRenderTargets);
+});
 
-const handleRender: RequestHandler<{}, string | ErrorResponse, RenderRequest> = async (
-  req,
-  res
-) => {
-  try {
-    const { name, data } = req.body;
+// GraphiQL interface
+server.get('/graphiql', (_req, res) => {
+  // Try to find the GraphiQL HTML file in multiple possible locations
+  const possiblePaths = [
+    path.join(__dirname, 'graphql', 'graphiql.html'),
+    path.join(__dirname, '..', 'graphql', 'graphiql.html'),
+    path.join(process.cwd(), 'graphql', 'graphiql.html'),
+  ];
 
-    if (!name) {
-      res.status(400).json({ error: 'Template name is required' });
-      return;
+  // Try each path until we find the file
+  let found = false;
+  for (const graphiqlPath of possiblePaths) {
+    try {
+      if (fs.existsSync(graphiqlPath)) {
+        const data = fs.readFileSync(graphiqlPath, 'utf8');
+        res.setHeader('Content-Type', 'text/html');
+        res.send(data);
+        found = true;
+        break;
+      }
+    } catch (err) {
+      // Continue to next path
     }
-
-    if (name !== 'default') {
-      res.status(404).json({ error: `Template '${name}' not found` });
-      return;
-    }
-
-    const app = createApp();
-    const html = await renderToString(app);
-
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Vue SSR Example</title>
-          <script type="importmap">
-            {
-              "imports": {
-                "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
-              }
-            }
-          </script>
-          <script type="module" src="/dist/client.js"></script>
-        </head>
-        <body>
-          <div id="app">${html}</div>
-        </body>
-      </html>
-    `);
-  } catch (error) {
-    console.error('Error rendering template:', error);
-    res.status(500).json({ error: 'Failed to render template' });
   }
-};
 
-server.post('/api/render', handleRender);
-
-const handleRoot: RequestHandler = async (_req, res) => {
-  try {
-    const app = createApp();
-    const html = await renderToString(app);
-
-    res.send(`
+  if (!found) {
+    // If we couldn't find the file, generate a simple GraphiQL HTML page on the fly
+    const html = `
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
       <head>
-        <title>Vue SSR Example</title>
-        <script type="importmap">
-          {
-            "imports": {
-              "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"              }
-            }
-          </script>
-          <script type="module" src="/dist/client.js"></script>
-        </head>
-        <body>
-          <div id="app">${html}</div>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Rendini Vue GraphQL API</title>
+        <style>
+          body { height: 100%; margin: 0; width: 100%; overflow: hidden; }
+          #graphiql { height: 100vh; }
+        </style>
+        <link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css" />
+      </head>
+      <body>
+        <div id="graphiql"></div>
+        <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+        <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+        <script src="https://unpkg.com/graphiql/graphiql.min.js"></script>
+        <script>
+          const fetchURL = '/graphql';
+          function graphQLFetcher(graphQLParams) {
+            return fetch(fetchURL, {
+              method: 'post',
+              headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+              body: JSON.stringify(graphQLParams),
+            }).then(response => response.json());
+          }
+          ReactDOM.render(
+            React.createElement(GraphiQL, { fetcher: graphQLFetcher }),
+            document.getElementById('graphiql'),
+          );
+        </script>
       </body>
     </html>
-    `);
-  } catch (error) {
-    console.error('Error rendering root:', error);
-    res.status(500).send('Internal Server Error');
+    `;
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
   }
-};
+});
 
-server.get('/', handleRoot);
+// Redirect root to GraphiQL for easy testing
+server.get('/', (_req, res) => {
+  res.redirect('/graphiql');
+});
 
-server.use(express.static('.'));
-
-server.listen(3000, () => {
-  console.log('ready');
+// Start server
+const port = process.env.PORT || 3000;
+const httpServer = createServer(server);
+httpServer.listen(port, () => {
+  console.log(`GraphQL server ready at http://localhost:${port}/graphql`);
+  console.log(`GraphiQL interface available at http://localhost:${port}/graphiql`);
 });
