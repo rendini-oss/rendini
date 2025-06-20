@@ -1,11 +1,15 @@
-// server.ts - Express server with Nunjucks templating
+// server.ts - Express server with Nunjucks templating and GraphQL API
 
-// Import required modules
 import express from 'express';
+import type { RequestHandler } from 'express';
 import nunjucks from 'nunjucks';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { graphql } from 'graphql';
+import cors from 'cors';
+import { schema } from './graphql/schema.js';
+import { resolvers } from './graphql/resolvers.js';
 
 // Get the directory name using ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -15,8 +19,9 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Configure Express to parse JSON bodies
+// Configure middleware
 app.use(express.json());
+app.use(cors());
 
 // Create templates directory if it doesn't exist
 const templatesDir = path.join(__dirname, 'templates');
@@ -41,58 +46,104 @@ if (!fs.existsSync(templatesPath)) {
   fs.mkdirSync(templatesPath, { recursive: true });
 }
 
-// Type for render request body
-interface RenderRequest {
-  name: string;
-  data?: Record<string, any>;
-}
-
 // Health check endpoint for Kubernetes readiness probe
-app.get('/healthz', (req: express.Request, res: express.Response) => {
+const healthCheck: RequestHandler = (_req, res) => {
   res.status(200).send('ok');
-});
+};
+app.get('/healthz', healthCheck);
 
-// API endpoint to list all available render targets (template names)
-app.get('/api/render-targets', (req: express.Request, res: express.Response) => {
+// GraphQL endpoint
+app.post('/graphql', async (req, res) => {
+  const { query, variables, operationName } = req.body;
   try {
-    // Read all .njk files from the pages directory
-    const files = fs
-      .readdirSync(templatesPath)
-      .filter(file => file.endsWith('.njk'))
-      .map(file => ({ name: file.replace('.njk', ''), template: file }));
-    res.json(files);
+    const result = await graphql({
+      schema,
+      source: query,
+      rootValue: resolvers,
+      variableValues: variables,
+      operationName,
+    });
+    res.json(result);
   } catch (error) {
-    console.error('Error listing render targets:', error);
-    res.status(500).json({ error: 'Failed to list render targets' });
+    console.error('GraphQL Error:', error);
+    res.status(500).json({ errors: [{ message: 'Internal server error' }] });
   }
 });
 
-// API endpoint to render a template with provided data
-app.post('/api/render', (req: express.Request, res: express.Response) => {
-  try {
-    const { name, data } = req.body as RenderRequest;
+// GraphiQL interface
+app.get('/graphiql', (_req, res) => {
+  // Try to find the GraphiQL HTML file in multiple possible locations
+  const possiblePaths = [
+    path.join(__dirname, 'graphiql', 'index.html'),
+    path.join(__dirname, '..', 'graphiql', 'index.html'),
+    path.join(process.cwd(), 'graphiql', 'index.html'),
+  ];
 
-    if (!name) {
-      return res.status(400).json({ error: 'Template name is required' });
+  // Try each path until we find the file
+  let found = false;
+  for (const graphiqlPath of possiblePaths) {
+    try {
+      if (fs.existsSync(graphiqlPath)) {
+        const data = fs.readFileSync(graphiqlPath, 'utf8');
+        res.setHeader('Content-Type', 'text/html');
+        res.send(data);
+        found = true;
+        break;
+      }
+    } catch (err) {
+      // Continue to next path
     }
+  }
 
-    // Check if the requested template exists
-    const templatePath = path.join(templatesPath, `${name}.njk`);
-    if (!fs.existsSync(templatePath)) {
-      return res.status(404).json({ error: `Template '${name}' not found` });
-    }
-
-    // Render the template with the provided data
-    const html = nunjucks.render(`${name}.njk`, data || {});
-
-    res.json({ name, html });
-  } catch (error) {
-    console.error('Error rendering template:', error);
-    res.status(500).json({ error: 'Failed to render template' });
+  if (!found) {
+    // If we couldn't find the file, generate a simple GraphiQL HTML page on the fly
+    const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Rendini Nunjucks GraphQL API</title>
+        <style>
+          body { height: 100%; margin: 0; width: 100%; overflow: hidden; }
+          #graphiql { height: 100vh; }
+        </style>
+        <link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css" />
+      </head>
+      <body>
+        <div id="graphiql"></div>
+        <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+        <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+        <script src="https://unpkg.com/graphiql/graphiql.min.js"></script>
+        <script>
+          const fetchURL = '/graphql';
+          function graphQLFetcher(graphQLParams) {
+            return fetch(fetchURL, {
+              method: 'post',
+              headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+              body: JSON.stringify(graphQLParams),
+            }).then(response => response.json());
+          }
+          ReactDOM.render(
+            React.createElement(GraphiQL, { fetcher: graphQLFetcher }),
+            document.getElementById('graphiql'),
+          );
+        </script>
+      </body>
+    </html>
+    `;
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
   }
 });
 
+// Redirect root to GraphiQL for easy testing
+app.get('/', (_req, res) => {
+  res.redirect('/graphiql');
+});
+
+// Start server
 app.listen(port, () => {
-  console.log(`🚀 Rendini Nunjucks Renderer running at http://localhost:${port}`);
-  console.log(`📃 Available templates at http://localhost:${port}/api/render-targets`);
+  console.log(`🚀 Rendini Nunjucks GraphQL API running at http://localhost:${port}/graphql`);
+  console.log(`� GraphiQL interface available at http://localhost:${port}/graphiql`);
 });

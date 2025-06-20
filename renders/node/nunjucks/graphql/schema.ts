@@ -1,23 +1,35 @@
-const typeDefs = `
-    scalar JSON
+import { buildSchema } from 'graphql';
 
-    type RenderTarget {
-        name: String!
-        template: String!
-    }
+// Define GraphQL schema based on render-api.graphql
+const schemaString = `
+  scalar JSON
+  scalar DateTime
 
-    type RenderResult {
-        name: String!
-        html: String!
-    }
+  type Query {
+    render(path: String!, params: JSON, context: RenderContextInput): RenderResult!
+    renderMap(namespace: String): [RenderEntry!]!
+  }
 
-    type Query {
-        renderTargets: [RenderTarget!]!
-    }
+  input RenderContextInput {
+    device: String
+    locale: String
+    userAgent: String
+    preview: Boolean
+  }
 
-    type Mutation {
-        render(name: String!, data: JSON): RenderResult!
-    }
+  type RenderResult {
+    content: String! # The rendered output (HTML, Markdown, SVG, etc.)
+    contentType: String! # MIME type of rendered content
+    metadata: JSON # Optional metadata returned by the renderer
+  }
+
+  type RenderEntry {
+    path: String! # e.g. "/docs/getting-started"
+    params: JSON # Parameters used to resolve this path
+    lastModified: DateTime
+    priority: Float
+    changeFrequency: String # e.g. "daily", "weekly"
+  }
 `;
 
-export default typeDefs;
+export const schema = buildSchema(schemaString);
