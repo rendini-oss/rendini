@@ -46,7 +46,7 @@ export const jsonScalar = new GraphQLScalarType({
   },
   parseLiteral(ast: any): unknown {
     // This is a simplified implementation
-    if (ast.kind === 'ObjectValue') {
+    if (ast.kind === "ObjectValue") {
       const result: Record<string, unknown> = {};
       ast.fields.forEach((field: any) => {
         result[field.name.value] = parseLiteralToJs(field.value);
@@ -60,17 +60,17 @@ export const jsonScalar = new GraphQLScalarType({
 // Helper function for JSON parsing
 function parseLiteralToJs(ast: any): unknown {
   switch (ast.kind) {
-    case 'IntValue':
+    case "IntValue":
       return parseInt(ast.value, 10);
-    case 'FloatValue':
+    case "FloatValue":
       return parseFloat(ast.value);
-    case 'BooleanValue':
+    case "BooleanValue":
       return ast.value;
-    case 'StringValue':
+    case "StringValue":
       return ast.value;
-    case 'NullValue':
+    case "NullValue":
       return null;
-    case 'ListValue':
+    case "ListValue":
       return ast.values.map(parseLiteralToJs);
     // Add more cases as needed
     default:
@@ -81,11 +81,11 @@ function parseLiteralToJs(ast: any): unknown {
 // Mock data for renderMap
 const renderEntries: RenderEntry[] = [
   {
-    path: '/default',
+    path: "/default",
     params: {},
     lastModified: new Date(),
     priority: 1.0,
-    changeFrequency: 'weekly',
+    changeFrequency: "weekly",
   },
 ];
 
@@ -99,7 +99,13 @@ export const resolvers = {
 
   // Root Query resolvers
   v1: {
-    // Query resolvers
+    /**
+     * Renders a Vue component to HTML.
+     * @param path - The template path.
+     * @param params - Optional parameters for rendering.
+     * @param context - Optional render context input.
+     * @returns The rendered result.
+     */
     render: async ({
       path,
       params,
@@ -139,27 +145,31 @@ export const resolvers = {
         </html>
       `;
 
-      return {
-        content,
-        contentType: 'text/html',
-        metadata: {
-          renderedWith: 'vue',
-          context,
-          params,
-        },
-      };
-    } catch (error) {
-      console.error('Error rendering:', error);
-      throw error;
-    }
+        return {
+          content,
+          contentType: "text/html",
+          metadata: {
+            renderedWith: "vue",
+            context,
+            params,
+          },
+        };
+      } catch (error) {
+        console.error("Error rendering:", error);
+        throw error;
+      }
+    },
+
+    /**
+     * Returns the list of available render entries, optionally filtered by namespace.
+     * @param namespace - Optional namespace to filter entries.
+     * @returns Array of RenderEntry objects.
+     */
+    renderMap: ({ namespace }: { namespace?: string }): RenderEntry[] => {
+      if (namespace) {
+        return renderEntries.filter(entry => entry.path.startsWith(`/${namespace}`));
+      }
+      return renderEntries;
+    },
   },
-
-  renderMap: ({ namespace }: { namespace?: string }): RenderEntry[] => {
-    // If namespace is provided, filter by namespace
-    if (namespace) {
-      return renderEntries.filter(entry => entry.path.startsWith(`/${namespace}`));
-    }
-
-    return renderEntries;
-  }
 };

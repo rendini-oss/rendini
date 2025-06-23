@@ -5,13 +5,14 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc && npm run copy-assets",
-    "dev": "tsc --watch",
+    "dev": "tsc && cross-env PORT=3002 nodemon dist/server.js",
     "start": "node dist/server.js",
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
     "copy-assets": "make-dir dist/graphql && cpy \"graphql/*.html\" dist/graphql/"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^5.1.0",
     "graphiql": "^4.1.2",
     "graphql": "^16.11.0",
@@ -21,11 +22,14 @@
     "node": ">=22.16.0"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.0.3",
     "@vue/tsconfig": "^0.5.1",
     "cpy-cli": "^5.0.0",
+    "cross-env": "^7.0.3",
     "make-dir-cli": "^4.0.0",
+    "nodemon": "^3.1.10",
     "rimraf": "^5.0.5",
     "typescript": "^5.4.2"
   }

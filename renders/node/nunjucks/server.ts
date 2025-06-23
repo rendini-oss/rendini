@@ -146,6 +146,8 @@ app.get("/", (_req, res) => {
 // Start server
 app.listen(port, () => {
   console.info(`🚀 Rendini Nunjucks GraphQL API running at http://localhost:${port}/graphql`);
-  console.info(`� GraphiQL interface available at http://localhost:${port}/graphiql`);
+  console.info(
+    `🚀 Rendini Nunjucks GraphiQL interface available at http://localhost:${port}/graphiql`
+  );
   console.info("Port numbers are internal to the container and may differ on the host.");
 });

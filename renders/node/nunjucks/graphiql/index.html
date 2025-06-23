@@ -23,7 +23,8 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/graphiql/graphiql.min.js"></script>
     <script>
-      const fetchURL = "/graphql";
+      // Dynamically determine the GraphQL endpoint URL based on the current location
+      const fetchURL = window.location.protocol + "//" + window.location.host + "/graphql";
 
       function graphQLFetcher(graphQLParams) {
         return fetch(fetchURL, {

@@ -54,15 +54,17 @@
     </script>
     <script type="module">
       // Import React and ReactDOM
-      import React from 'react';
-      import ReactDOM from 'react-dom/client';
+      import React from "react";
+      import ReactDOM from "react-dom/client";
       // Import GraphiQL and the Explorer plugin
-      import { GraphiQL } from 'graphiql';
-      import { createGraphiQLFetcher } from '@graphiql/toolkit';
-      import { explorerPlugin } from '@graphiql/plugin-explorer';
+      import { GraphiQL } from "graphiql";
+      import { createGraphiQLFetcher } from "@graphiql/toolkit";
+      import { explorerPlugin } from "@graphiql/plugin-explorer";
 
+      // Dynamically determine the GraphQL endpoint URL based on the current location
+      const graphqlUrl = `${window.location.protocol}//${window.location.host}/graphql`;
       const fetcher = createGraphiQLFetcher({
-        url: 'http://localhost:3000/graphql',
+        url: graphqlUrl,
       });
       const explorer = explorerPlugin();
 
@@ -73,7 +75,7 @@
         });
       }
 
-      const container = document.getElementById('graphiql');
+      const container = document.getElementById("graphiql");
       const root = ReactDOM.createRoot(container);
       root.render(React.createElement(App));
     </script>
