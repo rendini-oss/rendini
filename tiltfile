@@ -4,8 +4,9 @@ def main():
   bake_factory = (
     docker_factory.bake()
     .add_file_dependencies(
+      "container-compose.yaml",
       "container-bake.hcl",
-      "renders",
+      "renders/",
       "./Tiltfile",
     )
   )

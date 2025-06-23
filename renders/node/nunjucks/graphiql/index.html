@@ -19,18 +19,18 @@
   </head>
   <body>
     <div id="graphiql"></div>
-    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/graphiql/graphiql.min.js"></script>
     <script>
-      const fetchURL = '/graphql';
+      const fetchURL = "/graphql";
 
       function graphQLFetcher(graphQLParams) {
         return fetch(fetchURL, {
-          method: 'post',
+          method: "post",
           headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
+            Accept: "application/json",
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(graphQLParams),
         }).then(response => response.json());
@@ -43,26 +43,30 @@
 # Try querying for a rendered template:
 
 query {
-  render(path: "/home", params: { user: "GraphQL User" }) {
-    content
-    contentType
-    metadata
+  v1 {
+    render(path: "/home", params: { user: "GraphQL User" }) {
+      content
+      contentType
+      metadata
+    }
   }
 }
 
 # Or get the available render map:
 
 # query {
-#   renderMap {
-#     path
-#     priority
-#     changeFrequency
-#     lastModified
+#  v1 {
+#    renderMap {
+#       path
+#       priority
+#       changeFrequency
+#       lastModified
+#     }
 #   }
 # }
 `,
         }),
-        document.getElementById('graphiql')
+        document.getElementById("graphiql")
       );
     </script>
   </body>

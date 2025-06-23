@@ -2,13 +2,3 @@ GITHUB_TOKEN
 
 dist
 node_modules
-
-# Ignore package files in the root. They don't belong.
-# These can get created if a developer runs `npm init` or even `npm install`.
-package-lock.json
-package.json
-
-!mashup/**/package.json
-!mashup/**/package-lock.json
-!renders/**/package.json
-!renders/**/package-lock.json

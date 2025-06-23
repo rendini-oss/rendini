@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (c) 2025 Rendini Labs
 
-import express from 'express';
-import type { RequestHandler } from 'express';
-import nunjucks from 'nunjucks';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { graphql } from 'graphql';
-import cors from 'cors';
-import { schema } from './graphql/schema.js';
-import { resolvers } from './graphql/resolvers.js';
+import express from "express";
+import type { RequestHandler } from "express";
+import nunjucks from "nunjucks";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { graphql } from "graphql";
+import cors from "cors";
+import { schema } from "./graphql/schema.js";
+import { resolvers } from "./graphql/resolvers.js";
 
 // Get the directory name using ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -25,7 +25,7 @@ app.use(express.json());
 app.use(cors());
 
 // Create templates directory if it doesn't exist
-const templatesDir = path.join(__dirname, 'templates');
+const templatesDir = path.join(__dirname, "templates");
 if (!fs.existsSync(templatesDir)) {
   fs.mkdirSync(templatesDir, { recursive: true });
 }
@@ -33,9 +33,9 @@ if (!fs.existsSync(templatesDir)) {
 // Configure Nunjucks template engine
 // In development, the pages are in the root 'pages' directory
 // In production (after build), they should be in 'dist/pages'
-const templatesPath = fs.existsSync(path.join(__dirname, 'pages'))
-  ? path.join(__dirname, 'pages')
-  : path.join(__dirname, '../pages');
+const templatesPath = fs.existsSync(path.join(__dirname, "pages"))
+  ? path.join(__dirname, "pages")
+  : path.join(__dirname, "../pages");
 
 nunjucks.configure(templatesPath, {
   autoescape: true,
@@ -49,12 +49,12 @@ if (!fs.existsSync(templatesPath)) {
 
 // Health check endpoint for Kubernetes readiness probe
 const healthCheck: RequestHandler = (_req, res) => {
-  res.status(200).send('ok');
+  res.status(200).send("ok");
 };
-app.get('/healthz', healthCheck);
+app.get("/healthz", healthCheck);
 
 // GraphQL endpoint
-app.post('/graphql', async (req, res) => {
+app.post("/graphql", async (req, res) => {
   const { query, variables, operationName } = req.body;
   try {
     const result = await graphql({
@@ -66,18 +66,18 @@ app.post('/graphql', async (req, res) => {
     });
     res.json(result);
   } catch (error) {
-    console.error('GraphQL Error:', error);
-    res.status(500).json({ errors: [{ message: 'Internal server error' }] });
+    console.error("GraphQL Error:", error);
+    res.status(500).json({ errors: [{ message: "Internal server error" }] });
   }
 });
 
 // GraphiQL interface
-app.get('/graphiql', (_req, res) => {
+app.get("/graphiql", (_req, res) => {
   // Try to find the GraphiQL HTML file in multiple possible locations
   const possiblePaths = [
-    path.join(__dirname, 'graphiql', 'index.html'),
-    path.join(__dirname, '..', 'graphiql', 'index.html'),
-    path.join(process.cwd(), 'graphiql', 'index.html'),
+    path.join(__dirname, "graphiql", "index.html"),
+    path.join(__dirname, "..", "graphiql", "index.html"),
+    path.join(process.cwd(), "graphiql", "index.html"),
   ];
 
   // Try each path until we find the file
@@ -85,8 +85,8 @@ app.get('/graphiql', (_req, res) => {
   for (const graphiqlPath of possiblePaths) {
     try {
       if (fs.existsSync(graphiqlPath)) {
-        const data = fs.readFileSync(graphiqlPath, 'utf8');
-        res.setHeader('Content-Type', 'text/html');
+        const data = fs.readFileSync(graphiqlPath, "utf8");
+        res.setHeader("Content-Type", "text/html");
         res.send(data);
         found = true;
         break;
@@ -113,8 +113,8 @@ app.get('/graphiql', (_req, res) => {
       </head>
       <body>
         <div id="graphiql"></div>
-        <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
-        <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+        <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+        <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
         <script src="https://unpkg.com/graphiql/graphiql.min.js"></script>
         <script>
           const fetchURL = '/graphql';
@@ -133,18 +133,19 @@ app.get('/graphiql', (_req, res) => {
       </body>
     </html>
     `;
-    res.setHeader('Content-Type', 'text/html');
+    res.setHeader("Content-Type", "text/html");
     res.send(html);
   }
 });
 
 // Redirect root to GraphiQL for easy testing
-app.get('/', (_req, res) => {
-  res.redirect('/graphiql');
+app.get("/", (_req, res) => {
+  res.redirect("/graphiql");
 });
 
 // Start server
 app.listen(port, () => {
-  console.log(`🚀 Rendini Nunjucks GraphQL API running at http://localhost:${port}/graphql`);
-  console.log(`� GraphiQL interface available at http://localhost:${port}/graphiql`);
+  console.info(`🚀 Rendini Nunjucks GraphQL API running at http://localhost:${port}/graphql`);
+  console.info(`� GraphiQL interface available at http://localhost:${port}/graphiql`);
+  console.info("Port numbers are internal to the container and may differ on the host.");
 });
