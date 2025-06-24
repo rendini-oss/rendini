@@ -1,0 +1,17 @@
+{
+  "author": "Rendini OSS Team",
+  "bugs": {
+    "url": "https://github.com/rendini-oss/rendini/issues"
+  },
+  "homepage": "https://github.com/rendini-oss/rendini#readme",
+  "keywords": [],
+  "license": "Apache-2.0",
+  "name": "@rendini/specifications",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rendini-oss/rendini.git"
+  },
+  "type": "module",
+  "version": "0.1.0"
+}

@@ -1,16 +1,7 @@
 {
-  "name": "rendini-render-nunjucks",
-  "version": "0.1.0",
-  "main": "dist/server.js",
-  "type": "module",
-  "license": "Apache-2.0",
-  "scripts": {
-    "build": "tsc && npm run copy-assets",
-    "copy-assets": "make-dir dist/graphiql && cpy \"graphiql/*.html\" dist/graphiql/",
-    "start": "node dist/server.js",
-    "dev": "tsc && cross-env PORT=3001 nodemon dist/server.js",
-    "watch": "tsc -w",
-    "clean": "rimraf dist"
+  "author": "Rendini OSS Team",
+  "bugs": {
+    "url": "https://github.com/rendini-oss/rendini/issues"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -36,5 +27,25 @@
   },
   "engines": {
     "node": ">=22.16.0"
-  }
+  },
+  "homepage": "https://github.com/rendini-oss/rendini#readme",
+  "keywords": [],
+  "license": "Apache-2.0",
+  "main": "dist/server.js",
+  "name": "@rendini-renders/nunjucks",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rendini-oss/rendini.git"
+  },
+  "scripts": {
+    "build": "tsc && npm run copy-assets",
+    "copy-assets": "make-dir dist/graphiql && cpy \"graphiql/*.html\" dist/graphiql/",
+    "start": "node dist/server.js",
+    "dev": "tsc && cross-env PORT=3001 nodemon dist/server.js",
+    "watch": "tsc -w",
+    "clean": "rimraf dist"
+  },
+  "type": "module",
+  "version": "0.1.0"
 }

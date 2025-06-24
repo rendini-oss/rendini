@@ -1,15 +1,7 @@
 {
-  "name": "rendini-renders-vue",
-  "version": "0.1.0",
-  "type": "module",
-  "license": "Apache-2.0",
-  "scripts": {
-    "build": "tsc && npm run copy-assets",
-    "dev": "tsc && cross-env PORT=3002 nodemon dist/server.js",
-    "start": "node dist/server.js",
-    "clean": "rimraf dist",
-    "prebuild": "npm run clean",
-    "copy-assets": "make-dir dist/graphql && cpy \"graphql/*.html\" dist/graphql/"
+  "author": "Rendini OSS Team",
+  "bugs": {
+    "url": "https://github.com/rendini-oss/rendini/issues"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -17,9 +9,6 @@
     "graphiql": "^4.1.2",
     "graphql": "^16.11.0",
     "vue": "^3.5.17"
-  },
-  "engines": {
-    "node": ">=22.16.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
@@ -32,5 +21,28 @@
     "nodemon": "^3.1.10",
     "rimraf": "^5.0.5",
     "typescript": "^5.4.2"
-  }
+  },
+  "engines": {
+    "node": ">=22.16.0"
+  },
+  "homepage": "https://github.com/rendini-oss/rendini#readme",
+  "keywords": [],
+  "license": "Apache-2.0",
+  "main": "dist/server.js",
+  "name": "@rendini-renders/vue",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rendini-oss/rendini.git"
+  },
+  "scripts": {
+    "build": "tsc && npm run copy-assets",
+    "dev": "tsc && cross-env PORT=3002 nodemon dist/server.js",
+    "start": "node dist/server.js",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean",
+    "copy-assets": "make-dir dist/graphql && cpy \"graphql/*.html\" dist/graphql/"
+  },
+  "type": "module",
+  "version": "0.1.0"
 }
