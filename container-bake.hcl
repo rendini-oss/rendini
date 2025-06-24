@@ -1,12 +1,13 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2025 Rendini Labs.
 
+# The path used for the buildx cache (from and to).
 variable "BUILDKIT_CACHE_DIR" {
     type    = string
     default = "./.buildx/"
 }
 
-# This file is used by Docker BuildKit to define the build configuration for the Nunjucks render container.
+# The tag for the Node.js base image.
 variable "NODE_TAG" {
     type    = string
     default = "24.2.0-bookworm-slim@sha256:b30c143a092c7dced8e17ad67a8783c03234d4844ee84c39090c9780491aaf89"
@@ -24,7 +25,7 @@ target "node-base" {
     tags = ["localhost/rendini/node:latest"]
 }
 
-# This target builds the Rendini Nunjucks renders container.
+# This target builds the Rendini Nunjucks rendering container.
 target "render-nunjucks" {
     cache-from = ["type=local,src=${BUILDKIT_CACHE_DIR}/render-nunjucks/latest"]
     cache-to = ["type=local,dest=${BUILDKIT_CACHE_DIR}/render-nunjucks/latest"]
@@ -36,7 +37,7 @@ target "render-nunjucks" {
     tags = ["localhost/rendini/render-nunjucks:latest"]
 }
 
-# This target builds the Rendini Nunjucks renders container.
+# This target builds the Rendini Vue rendering container.
 target "render-vue" {
     cache-from = ["type=local,src=${BUILDKIT_CACHE_DIR}/render-vue/latest"]
     cache-to = ["type=local,dest=${BUILDKIT_CACHE_DIR}/render-vue/latest"]

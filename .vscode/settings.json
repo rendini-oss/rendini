@@ -34,10 +34,9 @@
     "container-compose.yaml": "container-bake.hcl",
     "LICENSE": "CONTRIBUTOR_LICENSE_AGREEMENT.md, GOVERNANCE.md, TRADEMARKS.md",
     "*.svg": "*.png",
-    "makefile": "package*.json, tiltfile, container-compose.yaml, .env*, stop.sh",
     "tsconfig.json": "tsconfig.*.json, env.d.ts",
     "vite.config.*": "jsconfig*, vitest.config.*, cypress.config.*, playwright.config.*",
-    "package.json": "package-lock.json, pnpm*, .yarnrc*, yarn*, .eslint*, eslint*, .oxlint*, oxlint*, .prettier*, prettier*, .gitignore, .editorconfig, .markdownlint.json, .node-version, tsconfig.json"
+    "package.json": "package-lock.json, pnpm*, .yarnrc*, yarn*, .eslint*, eslint*, .oxlint*, oxlint*, .prettier*, prettier*, .markdownlint.json, .node-version, tsconfig.json"
   },
   "files.associations": {
     "containerfile": "dockerfile",
@@ -58,7 +57,7 @@
   "markdownlint.config": {
     "MD030": { "ul_single": 1, "ol_single": 1, "ul_multi": 1, "ol_multi": 1 }
   },
-  "prettier.printWidth": 100,
+  "prettier.printWidth": 80,
   "prettier.proseWrap": "always",
   "prettier.tabWidth": 2,
   "python.analysis.exclude": ["**/node_modules", "**/dist", "**/.venv", "**/.env*"],

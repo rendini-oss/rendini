@@ -1,0 +1,116 @@
+"""
+Module for creating command builders.
+This module provides a factory function to create command builders that can
+add flags, options, and arguments to a command, and build the final command
+as a list or a string.
+"""
+
+def __create_command_builder(*initial_args):
+  """Creates a command builder for commands.
+
+  Args:
+    *initial_args: A variable number of initial arguments to start the command with.
+      These arguments will be included in the command list.
+
+  Returns:
+    A struct with methods for adding flags and building the command.
+  """
+
+  __command = []
+  __command.extend(initial_args)
+
+  def _add_flag(flag, *args):
+    """Adds a flag to the command.
+
+    Args:
+      flag: A string representing the flag to add to the command.
+      *args: A variable number of additional arguments to append to the flag.
+
+    Returns:
+      The current instance of the factory with the added flag.
+    """
+
+    __command.append(flag)
+
+    if args:
+      __command.extend(args)
+
+    return self
+
+  def _add_option(option, *args):
+    """Adds an option to the command.
+
+    Args:
+      option: A string representing the option to add to the command.
+      *args: A variable number of additional arguments to append to the option.
+
+    Returns:
+      The current instance of the factory with the added option.
+    """
+
+    __command.append(option)
+
+    if args:
+      __command.extend(args)
+
+    return self
+
+  def _add_arg(arg):
+    """Adds an argument to the command.
+
+    Args:
+      arg: A string representing the argument to add to the command.
+
+    Returns:
+      The current instance of the factory with the added argument.
+    """
+
+    __command.append(arg)
+
+    return self
+
+  def _add_args(*args):
+    """Adds multiple arguments to the command.
+
+    Args:
+      *args: A variable number of arguments to add to the command.
+
+    Returns:
+      The current instance of the factory with the added arguments.
+    """
+
+    __command.extend(args)
+
+    return self
+
+  def _build():
+    """Builds the command and returns it.
+
+    Returns:
+      The command as a list of strings.
+    """
+
+    return __command
+
+  def _to_string():
+    """Converts the command to a string representation.
+
+    Returns:
+      A string representation of the command.
+    """
+    return " ".join(__command)
+
+  self = struct(
+    add_arg=_add_arg,
+    add_args=_add_args,
+    add_flag=_add_flag,
+    add_option=_add_option,
+    build=_build,
+    to_string=_to_string,
+  )
+
+  return self
+
+command_factory = struct(
+  create=__create_command_builder,
+)
