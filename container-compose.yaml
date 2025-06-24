@@ -16,3 +16,18 @@ services:
     labels:
       # Removes container when stopped (similar to --rm flag)
       - "com.docker.compose.rm=true"
+
+  render-vue:
+    image: localhost/rendini/render-vue:latest
+    container_name: rendini-render-vue
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    ports:
+      - "3002:3000"
+    tty: true
+    stdin_open: true
+    restart: "no"
+    labels:
+      # Removes container when stopped (similar to --rm flag)
+      - "com.docker.compose.rm=true"

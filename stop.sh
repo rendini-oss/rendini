@@ -5,6 +5,9 @@ set -e
 main() {
   echo "Stopping Rendini..."
 
+  echo "Executing tilt down..."
+  tilt down || true
+
   echo "Searching for running Rendini containers..."
   stopped_container_count=0
   docker ps --filter "name=rendini" --format "{{.ID}}" | while read -r container_id; do

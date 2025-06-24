@@ -34,6 +34,9 @@ up: start
 stop:
 	@./stop.sh
 
+.PHONY: restart
+restart: stop start
+
 .PHONY: clean
 clean: stop
 	@echo "Cleaning Rendini..."

@@ -1,18 +1,37 @@
+"""Tiltfile for setting up Docker builds and baking process using Tilt."""
+
 load("./tilt/docker.tilt", "docker_factory")
 
 def main():
-  bake_factory = (
+  """Main function to set up the Docker build and bake process using Tilt.
+
+  Returns:
+    None
+  """
+
+  builder_name = "rendini-builder"
+
+  (
+    docker_factory
+    .create_builder(name=builder_name)
+    .get_resource()
+  ).add_file_dependencies(
+    "tilt/",
+    "tiltfile",
+  ).create_resource()
+
+  (
     docker_factory.bake()
-    .add_file_dependencies(
-      "container-compose.yaml",
-      "container-bake.hcl",
-      "renders/",
-      "./Tiltfile",
-    )
-  )
+    .load_image()
+    .get_resource()
+  ).add_resource_dependencies(builder_name).add_file_dependencies(
+    "renders/",
+    "tilt/",
+    "container-compose.yaml",
+    "container-bake.hcl",
+    "tiltfile",
+  ).create_resource()
 
-  bake_factory.create_resource()
-
-  docker_compose('./container-compose.yaml')
+  # docker_compose('./container-compose.yaml')
 
 main()

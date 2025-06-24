@@ -20,9 +20,6 @@ FROM base AS prod
 COPY --from=builder --chown=node:node /app/node_modules/ /app/node_modules/
 COPY --from=builder --chown=node:node /app/dist/ /app/dist/
 
-RUN mkdir -p /app/dist/pages
-COPY --chown=node:node pages/*.njk /app/dist/pages/
-
 # Expose the port the app will run on
 EXPOSE 3000
 
