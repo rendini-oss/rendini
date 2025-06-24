@@ -61,5 +61,6 @@
   "prettier.proseWrap": "always",
   "prettier.tabWidth": 2,
   "python.analysis.exclude": ["**/node_modules", "**/dist", "**/.venv", "**/.env*"],
-  "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools"
+  "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools",
+  "makefile.configureOnOpen": false
 }
