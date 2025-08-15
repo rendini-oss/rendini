@@ -1,0 +1,42 @@
+"""Tiltfile for setting up Docker builds and baking process using Tilt."""
+
+load("./tilt/docker.tilt", "docker_factory")
+
+def main():
+  """Main function to set up the Docker build and bake process using Tilt.
+
+  Returns:
+    None
+  """
+
+  builder_name = "rendini-builder"
+
+  (
+    docker_factory
+    .create_builder(name=builder_name)
+    .get_resource()
+  ).add_file_dependencies(
+    "tilt/",
+    "tiltfile",
+  ).add_resource_labels("build").create_resource()
+
+  (
+    docker_factory.bake()
+    .load_image()
+    .get_resource()
+  ).add_resource_dependencies(builder_name).add_file_dependencies(
+    "mashup/",
+    "renders/",
+    "tilt/",
+    "container-compose.yaml",
+    "container-bake.hcl",
+    "tiltfile",
+  ).add_resource_labels("build").create_resource()
+
+  docker_compose('./container-compose.yaml', wait=True)
+
+  dc_resource("mashup", infer_links=True, labels=["rendini"])
+  dc_resource("render-nunjucks", infer_links=True, labels=["rendini-renders"])
+  dc_resource("render-vue", infer_links=True, labels=["rendini-renders"])
+
+main()

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rendini Nunjucks GraphQL API</title>
+    <style>
+      body {
+        height: 100%;
+        margin: 0;
+        width: 100%;
+        overflow: hidden;
+      }
+      #graphiql {
+        height: 100vh;
+      }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css" />
+  </head>
+  <body>
+    <div id="graphiql"></div>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/graphiql/graphiql.min.js"></script>
+    <script>
+      // Dynamically determine the GraphQL endpoint URL based on the current location
+      const fetchURL = window.location.protocol + "//" + window.location.host + "/graphql";
+
+      function graphQLFetcher(graphQLParams) {
+        return fetch(fetchURL, {
+          method: "post",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(graphQLParams),
+        }).then(response => response.json());
+      }
+
+      ReactDOM.render(
+        React.createElement(GraphiQL, {
+          fetcher: graphQLFetcher,
+          defaultQuery: `# Welcome to Rendini Nunjucks GraphQL API
+# Try querying for a rendered template:
+
+query {
+  v1 {
+    render(path: "/home", params: { user: "GraphQL User" }) {
+      content
+      contentType
+      metadata
+    }
+  }
+}
+
+# Or get the available render map:
+
+# query {
+#  v1 {
+#    renderMap {
+#       path
+#       priority
+#       changeFrequency
+#       lastModified
+#     }
+#   }
+# }
+`,
+        }),
+        document.getElementById("graphiql")
+      );
+    </script>
+  </body>
+</html>

@@ -1,0 +1,25 @@
+# https://hub.docker.com/_/node
+ARG IMAGE_ID=docker.io/library/node:24.2.0-bookworm-slim@sha256:b30c143a092c7dced8e17ad67a8783c03234d4844ee84c39090c9780491aaf89
+
+# Dockerfile for Rendini Nunjucks page rendering
+FROM ${IMAGE_ID}
+
+USER root
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+  DEBIAN_FRONTEND=noninteractive apt-get update \
+  && DEBIAN_FRONTEND=noninteractive apt-get install \
+  --assume-yes --no-install-recommends \
+  ca-certificates \
+  dumb-init \
+  && apt-get clean \
+  && rm --recursive /var/lib/apt/lists/*
+
+RUN mkdir /app \
+  && chown node:node /app
+
+USER node
+
+# Set working directory in container
+WORKDIR /app

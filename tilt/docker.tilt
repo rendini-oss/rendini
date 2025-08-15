@@ -1,0 +1,272 @@
+"""
+Module containing Docker buildx bake functionality for Tilt.
+This module provides factory methods for creating and configuring Docker
+buildx bake commands.
+"""
+
+load("command.tilt", "command_factory")
+load("filesystem.tilt", "cfs")
+load("resources.tilt", "resource_factory")
+
+def __is_debug_mode():
+  """Checks if the debug mode is enabled.
+
+  Returns:
+    True if debug mode is enabled, otherwise False.
+  """
+
+  debug_value = os.getenv('DEBUG', "0")
+
+  return debug_value == "1" or debug_value == "true"
+
+def __create_builder(
+  name="buildx-builder",
+  resource_name=None,
+  working_dir=None,
+):
+  """Sets up the Tilt environment for Docker buildx bake commands.
+
+  Args:
+    name: Name of the Tilt resource to create. Defaults to "rendini-builder".
+    resource_name: Name of the local_resource to create. If not provided, defaults to the name.
+    working_dir: Optional working directory for the Docker buildx bake command.
+      If not provided, defaults to the current directory.
+
+  Returns:
+    True if the setup is successful, otherwise raises an error.
+  """
+
+  local_resource_name = resource_name
+
+  if not local_resource_name or len(local_resource_name) == 0:
+    local_resource_name = name
+
+  script_dir = os.path.dirname(__file__)
+  script_path = os.path.join(script_dir, "create_builder.sh")
+  script_path = cfs.clean(script_path)
+
+  _executable_command_builder = command_factory.create(
+    "chmod",
+    "+x",
+    script_path,
+  )
+  _executable_resource_name = "%s:+x" % local_resource_name
+  _executable_resource = resource_factory.create(
+    _executable_resource_name,
+    _executable_command_builder,
+    working_dir,
+  )
+
+  _exec_builder = command_factory.create(
+    "sh",
+    "-c",
+    "'%s %s'" % (
+      script_path,
+      name,
+    ),
+  )
+  _exec_resource = resource_factory.create(
+    local_resource_name,
+    _exec_builder,
+    working_dir,
+  )
+
+  _exec_resource.add_resource_dependencies(_executable_resource_name)
+
+  def _add_file_dependencies(*file_dependencies):
+    """Adds file dependencies for the docker buildx bake command.
+
+    Args:
+      *file_dependencies: A variable number of file paths to add as dependencies.
+    Returns:
+      The current instance of the factory with the added file dependencies.
+    """
+
+    _executable_resource.add_file_dependencies(*file_dependencies)
+    _exec_resource.add_file_dependencies(*file_dependencies)
+
+    return _resource
+
+  def _add_ignore_file_dependencies(*ignore_file_dependencies):
+    """Adds ignore file dependencies for the docker buildx bake command.
+
+    Args:
+      *ignore_file_dependencies: A variable number of file paths to ignore as dependencies.
+    Returns:
+      The current instance of the factory with the added ignore file dependencies.
+    """
+
+    _executable_resource.add_ignore_file_dependencies(*ignore_file_dependencies)
+    _exec_resource.add_ignore_file_dependencies(*ignore_file_dependencies)
+
+    return _resource
+
+  def _add_resource_dependencies(*resource_dependencies):
+    """Adds resource dependencies for the docker buildx bake command.
+
+    Args:
+      *resource_dependencies: A variable number of resource names to add as dependencies.
+    Returns:
+      The current instance of the factory with the added resource dependencies.
+    """
+
+    _executable_resource.add_resource_dependencies(*resource_dependencies)
+    _exec_resource.add_resource_dependencies(*resource_dependencies)
+
+    return _resource
+
+  def _add_resource_labels(*resource_labels):
+    """Adds resource labels for the docker buildx bake command.
+
+    Args:
+      *resource_labels: A variable number of resource labels to add.
+    Returns:
+      The current instance of the factory with the added resource labels.
+    """
+
+    if __is_debug_mode():
+      print("DEBUG: Adding resource labels:", resource_labels)
+
+    _executable_resource.add_resource_labels(*resource_labels)
+    _exec_resource.add_resource_labels(*resource_labels)
+
+    return _resource
+
+  def _create_resource():
+    """Creates the Tilt resource with the configured command and dependencies.
+
+    Returns:
+      None. This method registers the resource with Tilt.
+    """
+
+    _executable_resource.create_resource()
+    _exec_resource.create_resource()
+
+  _resource = struct(
+    add_file_dependencies=_add_file_dependencies,
+    add_ignore_file_dependencies=_add_ignore_file_dependencies,
+    add_resource_dependencies=_add_resource_dependencies,
+    add_resource_labels=_add_resource_labels,
+    create_resource=_create_resource,
+  )
+
+  def _get_resource():
+    """Returns the Tilt resource for the Docker buildx bake command.
+
+    Returns:
+      The Tilt resource struct.
+    """
+
+    return _resource
+
+  self = struct(
+    get_resource=_get_resource,
+  )
+
+  return self
+
+def __bake(
+  file_name="./container-bake.hcl",
+  resource_name="",
+):
+  """Creates a factory method for building resources for docker buildx bake commands.
+
+  Args:
+    file_name: Name of the file containing the docker buildx bake configuration.
+      Defaults to "./container-bake.hcl".
+    resource_name: Name of the local_resource to create. If not provided, defaults to "docker-bake".
+
+  Returns:
+    A struct with methods for configuring and executing the docker buildx bake command.
+  """
+
+  _command_builder = command_factory.create(
+    "docker",
+    "buildx",
+    "bake",
+    "--file",
+    file_name,
+  )
+
+  def _debug():
+    """Enables debug mode for the docker buildx bake command.
+
+    Returns:
+      The current instance of the factory with debug mode enabled.
+    """
+    _command_builder.add_flag("--debug=true")
+
+    return self
+
+  def _load_image():
+    """Enables loading of the built image for the docker buildx bake command.
+
+    Returns:
+      The current instance of the factory with image loading enabled.
+    """
+    _command_builder.add_flag("--load=true")
+
+    return self
+
+  def _print():
+    """Enables print mode for the docker buildx bake command.
+
+    Returns:
+      The current instance of the factory with debug mode enabled.
+    """
+    _command_builder.add_flag("--print=true")
+
+    return self
+
+  def _push():
+    """Enables pushing of the built image for the docker buildx bake command.
+
+    Returns:
+      The current instance of the factory with debug mode enabled.
+    """
+    _command_builder.add_flag("--push=true")
+
+    return self
+
+  def _sbom():
+    """Enables generation of a Software Bill of Materials (SBOM) for the docker buildx bake command.
+
+    Returns:
+      The current instance of the factory with SBOM generation enabled.
+    """
+    _command_builder.add_flag("--sbom=true")
+
+    return self
+
+  local_resource_name = resource_name
+
+  if not local_resource_name or len(local_resource_name) == 0:
+    local_resource_name = "docker-bake"
+
+  __tilt_resource = resource_factory.create(local_resource_name, _command_builder)
+
+  def _get_resource():
+    """Returns the Tilt resource for the Docker buildx bake command.
+
+    Returns:
+      The Tilt resource struct.
+    """
+
+    return __tilt_resource
+
+  self = struct(
+    # Buildx helper methods.
+    debug=_debug,
+    load_image=_load_image,
+    print=_print,
+    push=_push,
+    sbom=_sbom,
+    get_resource=_get_resource,
+  )
+
+  return self
+
+docker_factory = struct(
+  create_builder=__create_builder,
+  bake=__bake,
+)

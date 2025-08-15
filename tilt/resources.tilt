@@ -1,0 +1,133 @@
+"""
+Module that returns a Tilt factory for creating resources.
+"""
+
+def __is_debug_mode():
+  """Checks if the debug mode is enabled.
+
+  Returns:
+    True if debug mode is enabled, otherwise False.
+  """
+
+  debug_value = os.getenv('DEBUG', "0")
+
+  return debug_value == "1" or debug_value == "true"
+
+def __create_tilt_resource(resource_name, command_builder, working_dir=None):
+  """Creates a Tilt resource.
+
+  Args:
+    resource_name: Name of the local_resource to create.
+    command_builder: A function that builds the command for the Docker buildx bake.
+      This function should return a list of strings representing the command.
+    working_dir: Optional working directory for the Docker buildx bake command.
+      If not provided, defaults to the current directory.
+
+  Returns:
+    A struct with methods for configuring and executing the Docker buildx bake command.
+  """
+
+  __file_dependencies = []
+  __ignore_file_dependencies = []
+  __resource_dependencies = []
+  __resource_labels = []
+
+  def _add_file_dependencies(*file_dependencies):
+    """Adds file dependencies for the docker buildx bake command.
+
+    Args:
+      *file_dependencies: A variable number of file paths to add as dependencies.
+    Returns:
+      The current instance of the factory with the added file dependencies.
+    """
+    __file_dependencies.extend(file_dependencies)
+
+    return self
+
+  def _add_ignore_file_dependencies(*ignore_file_dependencies):
+    """Adds ignore file dependencies for the docker buildx bake command.
+
+    Args:
+      *ignore_file_dependencies: A variable number of file paths to ignore as dependencies.
+    Returns:
+      The current instance of the factory with the added ignore file dependencies.
+    """
+    __ignore_file_dependencies.extend(ignore_file_dependencies)
+
+    return self
+
+  def _add_resource_dependencies(*resource_dependencies):
+    """Adds resource dependencies for the docker buildx bake command.
+
+    Args:
+      *resource_dependencies: A variable number of resource names to add as
+      dependencies.
+    Returns:
+      The current instance of the factory with the added resource dependencies.
+    """
+
+    __resource_dependencies.extend(resource_dependencies)
+
+    return self
+
+  def _add_resource_labels(*resource_labels):
+    """Adds resource labels for the docker buildx bake command.
+
+    Args:
+      *resource_labels: A variable number of resource labels to add.
+    Returns:
+      The current instance of the factory with the added resource labels.
+    """
+
+    __resource_labels.extend(resource_labels)
+
+    return self
+
+  def _create_resource():
+    """Creates the Tilt resource with the configured command and dependencies.
+
+    Returns:
+      None. This method registers the resource with Tilt.
+    """
+
+    full_command = command_builder.to_string()
+
+    local_working_dir = working_dir
+
+    if not local_working_dir or len(local_working_dir) == 0:
+      local_working_dir = "."
+
+    if __is_debug_mode():
+      print(
+        "DEBUG: Creating Tilt resource '%s'... (Dependencies: %s, Labels: %s)" % (
+          resource_name,
+          __resource_dependencies,
+          __resource_labels,
+        )
+      )
+
+    local_resource(
+      name=resource_name,
+      cmd=full_command,
+      deps=__file_dependencies,
+      dir=local_working_dir,
+      ignore=__ignore_file_dependencies,
+      labels=__resource_labels,
+      resource_deps=__resource_dependencies,
+    )
+
+  self = struct(
+    # Tilt resource helper methods.
+    add_file_dependencies=_add_file_dependencies,
+    add_ignore_file_dependencies=_add_ignore_file_dependencies,
+    add_resource_dependencies=_add_resource_dependencies,
+    add_resource_labels=_add_resource_labels,
+    # Finalization methods.
+    create_resource=_create_resource,
+  )
+
+  return self
+
+resource_factory = struct(
+  create=__create_tilt_resource,
+)

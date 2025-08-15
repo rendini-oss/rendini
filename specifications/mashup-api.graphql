@@ -1,0 +1,39 @@
+type Query {
+  """
+  API version 1
+  """
+  v1: V1Query
+}
+
+type V1Query {
+  renderAll(query: RenderQueryInput!): [RenderResult!]!
+  renderSitemap(filter: SitemapFilter): SitemapOutput!
+  renderIndex: [RenderIndexEntry!]!
+}
+
+input RenderQueryInput {
+  paths: [String!]! # Fully resolved paths
+  context: RenderContextInput
+  namespace: String # Optional filter
+}
+
+input SitemapFilter {
+  namespace: String
+  since: DateTime
+  includeVariants: Boolean = false
+}
+
+type SitemapOutput {
+  xml: String!
+  json: JSON!
+  generatedAt: DateTime!
+  count: Int!
+}
+
+type RenderIndexEntry {
+  namespace: String!
+  path: String!
+  contentType: String!
+  lastModified: DateTime
+  plugin: String
+}

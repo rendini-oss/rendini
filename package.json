@@ -1,0 +1,22 @@
+{
+  "author": "Rendini OSS Team",
+  "bugs": {
+    "url": "https://github.com/rendini-oss/rendini/issues"
+  },
+  "description": "The Rendini open source project unifies web rendering into a single, powerful API. It provides a GraphQL interface for rendering web pages and components, enabling developers to build applications that can render content from various sources seamlessly.",
+  "homepage": "https://github.com/rendini-oss/rendini#readme",
+  "keywords": [],
+  "license": "Apache-2.0",
+  "name": "@rendini/project",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rendini-oss/rendini.git"
+  },
+  "version": "0.1.0",
+  "workspaces": [
+    "specifications",
+    "mashup",
+    "renders/*"
+  ]
+}

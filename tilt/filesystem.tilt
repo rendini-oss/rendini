@@ -1,0 +1,22 @@
+"""
+Module for cross-platform file system methods like cleaning file system paths
+to ensure cross-platform compatibility.
+"""
+
+def __clean_fs_path(fs_path):
+  """Cleans a cross-platform, compatible file system path.
+
+  Replaces backslashes and removing redundant slashes.
+
+  Args:
+    fs_path: The file system path to clean.
+
+  Returns:
+    A cleaned file system path as a string.
+  """
+
+  return fs_path.replace("\\", "/").replace("/./", "/")
+
+cfs = struct(
+  clean=__clean_fs_path,
+)
