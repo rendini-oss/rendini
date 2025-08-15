@@ -3,9 +3,57 @@
 
 import express from "express";
 import { graphqlHTTP } from "express-graphql";
-import { buildSchema, GraphQLScalarType } from "graphql";
+import { buildSchema, GraphQLScalarType, ValueNode } from "graphql";
 import fetch from "node-fetch";
-import { RenderTarget, RenderRequest, RenderResult } from "./types.js";
+import { RenderResult } from "./types.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+interface RenderQueryInput {
+  paths: string[];
+  context?: RenderContextInput;
+  namespace?: string;
+}
+
+interface RenderContextInput {
+  device?: string;
+  locale?: string;
+  userAgent?: string;
+  preview?: boolean;
+}
+
+interface SitemapFilter {
+  namespace?: string;
+  since?: Date;
+  includeVariants?: boolean;
+}
+
+interface SitemapEntry {
+  path: string;
+  lastModified: string;
+  priority?: number;
+  changefreq?: string;
+}
+
+interface RenderIndexEntry {
+  namespace: string;
+  path: string;
+  contentType: string;
+  lastModified?: Date;
+  plugin?: string;
+}
+
+interface SitemapOutput {
+  xml: string;
+  json: SitemapEntry[];
+  generatedAt: Date;
+  count: number;
+}
+
+// Get __filename and __dirname in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Configurable rendering endpoints
 const RENDERS = [
@@ -15,33 +63,61 @@ const RENDERS = [
 
 // GraphQL schema
 const schema = buildSchema(`
-  type RenderTarget {
-    name: String!
-    template: String!
-    source: String!
-  }
-  type RenderResult {
-    html: String!
-  }
   type Query {
     """
     API version 1
     """
     v1: V1Query
   }
+
   type V1Query {
-    renderTargets: [RenderTarget!]!
+    renderAll(query: RenderQueryInput!): [RenderResult!]!
+    renderSitemap(filter: SitemapFilter): SitemapOutput!
+    renderIndex: [RenderIndexEntry!]!
   }
-  type Mutation {
-    """
-    API version 1
-    """
-    v1: V1Mutation
+
+  input RenderQueryInput {
+    paths: [String!]! # Fully resolved paths
+    context: RenderContextInput
+    namespace: String # Optional filter
   }
-  type V1Mutation {
-    render(name: String!, data: JSON, source: String!): RenderResult!
+
+  input SitemapFilter {
+    namespace: String
+    since: DateTime
+    includeVariants: Boolean = false
   }
+
+  type SitemapOutput {
+    xml: String!
+    json: JSON!
+    generatedAt: DateTime!
+    count: Int!
+  }
+
+  type RenderIndexEntry {
+    namespace: String!
+    path: String!
+    contentType: String!
+    lastModified: DateTime
+    plugin: String
+  }
+
+  input RenderContextInput {
+    device: String
+    locale: String
+    userAgent: String
+    preview: Boolean
+  }
+
+  type RenderResult {
+    content: String! # The rendered output (HTML, Markdown, SVG, etc.)
+    contentType: String! # MIME type of rendered content
+    metadata: JSON # Optional metadata returned by the source
+  }
+
   scalar JSON
+  scalar DateTime
 `);
 
 // JSON scalar implementation
@@ -89,53 +165,136 @@ const JSONScalar = new GraphQLScalarType({
 });
 
 /**
- * Helper to aggregate render targets from all renders
- * @returns A promise that resolves to an array of RenderTarget objects
+ * DateTime scalar implementation for GraphQL
  */
-async function getAllRenderTargets(): Promise<RenderTarget[]> {
+const DateTimeScalar = new GraphQLScalarType({
+  name: "DateTime",
+  description: "DateTime custom scalar type",
+  parseValue(value: string | number): Date {
+    return new Date(value);
+  },
+  serialize(value: Date | string | number): string {
+    return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+  },
+  parseLiteral(ast: ValueNode): Date | null {
+    if (ast.kind === "StringValue") {
+      return new Date(ast.value);
+    }
+    return null;
+  },
+});
+
+/**
+ * Helper to execute render query across all sources
+ * @param query The render query parameters
+ * @returns A promise that resolves to an array of RenderResult objects
+ */
+async function renderAll(query: RenderQueryInput): Promise<RenderResult[]> {
+  const validSources = query.namespace ? RENDERS.filter(r => r.name === query.namespace) : RENDERS;
+
   const results = await Promise.all(
-    RENDERS.map(async source => {
+    validSources.map(async source => {
       try {
-        const res = await fetch(`${source.url}/api/render-targets`);
-        if (!res.ok) return [];
-        const targets = (await res.json()) as any[];
-        return targets.map((t: any) => ({ ...t, source: source.name }));
+        const res = await fetch(`${source.url}/api/v1/render`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ paths: query.paths, context: query.context }),
+        });
+
+        if (!res.ok) {
+          console.error(`Error from ${source.name}: ${await res.text()}`);
+          return [];
+        }
+
+        return (await res.json()) as RenderResult[];
       } catch (error) {
-        console.error(`Error fetching from ${source.name}:`, error);
+        console.error(`Error rendering with ${source.name}:`, error);
         return [];
       }
     })
   );
-  return results.flat();
+
+  return results.flat() as RenderResult[];
 }
 
 /**
- * Helper to proxy render call to the correct source
- * @param args The render request parameters
- * @returns A promise that resolves to a RenderResult
+ * Helper to generate sitemap from render sources
+ * @param filter Optional filter parameters
+ * @returns A promise that resolves to a SitemapOutput object
  */
-async function renderTemplate(args: RenderRequest): Promise<RenderResult> {
-  const { name, data, source } = args;
-  const r = RENDERS.find(r => r.name === source);
-  if (!r) throw new Error(`source not found: ${source}`);
+async function renderSitemap(filter?: SitemapFilter): Promise<SitemapOutput> {
+  const validSources = filter?.namespace
+    ? RENDERS.filter(r => r.name === filter.namespace)
+    : RENDERS;
 
-  try {
-    const res = await fetch(`${r.url}/api/render`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, data }),
-    });
+  const entries = await Promise.all(
+    validSources.map(async source => {
+      try {
+        const res = await fetch(
+          `${source.url}/api/v1/sitemap${
+            filter?.since ? `?since=${filter.since.toISOString()}` : ""
+          }`
+        );
+        if (!res.ok) return [];
+        return (await res.json()) as SitemapEntry[];
+      } catch (error) {
+        console.error(`Error fetching sitemap from ${source.name}:`, error);
+        return [];
+      }
+    })
+  );
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`Render failed (${res.status}): ${errorText}`);
-    }
+  const allEntries = entries.flat() as SitemapEntry[];
+  const generatedAt = new Date();
 
-    return (await res.json()) as RenderResult;
-  } catch (error) {
-    console.error(`Error rendering with ${source}:`, error);
-    throw error;
-  }
+  // Generate sitemap XML
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+      ${allEntries
+        .map(
+          entry => `
+        <url>
+          <loc>${entry.path}</loc>
+          <lastmod>${entry.lastModified}</lastmod>
+          ${entry.priority ? `<priority>${entry.priority}</priority>` : ""}
+          ${entry.changefreq ? `<changefreq>${entry.changefreq}</changefreq>` : ""}
+        </url>
+      `
+        )
+        .join("")}
+    </urlset>`;
+
+  return {
+    xml,
+    json: allEntries,
+    generatedAt,
+    count: allEntries.length,
+  };
+}
+
+/**
+ * Helper to get index of all available render paths
+ * @returns A promise that resolves to an array of RenderIndexEntry objects
+ */
+async function getRenderIndex(): Promise<RenderIndexEntry[]> {
+  const results = await Promise.all(
+    RENDERS.map(async source => {
+      try {
+        const res = await fetch(`${source.url}/api/v1/index`);
+        if (!res.ok) return [];
+        const entries = (await res.json()) as RenderIndexEntry[];
+        return entries.map(entry => ({
+          ...entry,
+          plugin: source.name,
+        }));
+      } catch (error) {
+        console.error(`Error fetching index from ${source.name}:`, error);
+        return [];
+      }
+    })
+  );
+
+  return results.flat() as RenderIndexEntry[];
 }
 
 /**
@@ -143,14 +302,12 @@ async function renderTemplate(args: RenderRequest): Promise<RenderResult> {
  */
 const root = {
   v1: {
-    renderTargets: getAllRenderTargets,
-  },
-  Mutation: {
-    v1: {
-      render: renderTemplate,
-    },
+    renderAll: async ({ query }: { query: RenderQueryInput }) => renderAll(query),
+    renderSitemap: async ({ filter }: { filter?: SitemapFilter }) => renderSitemap(filter),
+    renderIndex: () => getRenderIndex(),
   },
   JSON: JSONScalar,
+  DateTime: DateTimeScalar,
 };
 
 const app = express();
@@ -184,7 +341,79 @@ app.get("/healthz", (req: express.Request, res: express.Response) => {
   res.status(200).send("ok");
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Rendini API listening on port ${PORT}`);
+// GraphiQL interface
+app.get("/graphiql", (_req, res) => {
+  // Try to find the GraphiQL HTML file in multiple possible locations
+  const possiblePaths = [
+    path.join(__dirname, "graphiql", "index.html"),
+    path.join(__dirname, "..", "graphiql", "index.html"),
+    path.join(process.cwd(), "graphiql", "index.html"),
+  ];
+
+  let found = false;
+  for (const graphiqlPath of possiblePaths) {
+    try {
+      if (fs.existsSync(graphiqlPath)) {
+        const data = fs.readFileSync(graphiqlPath, "utf8");
+        res.setHeader("Content-Type", "text/html");
+        res.send(data);
+        found = true;
+        break;
+      }
+    } catch (err) {
+      // Continue to next path
+    }
+  }
+
+  if (!found) {
+    // If we couldn't find the file, generate a simple GraphiQL HTML page on the fly
+    const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Rendini Mashup GraphQL API</title>
+        <style>
+          body { height: 100%; margin: 0; width: 100%; overflow: hidden; }
+          #graphiql { height: 100vh; }
+        </style>
+        <link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css" />
+      </head>
+      <body>
+        <div id="graphiql"></div>
+        <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+        <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+        <script src="https://unpkg.com/graphiql/graphiql.min.js"></script>
+        <script>
+          const fetchURL = '/graphql';
+          function graphQLFetcher(graphQLParams) {
+            return fetch(fetchURL, {
+              method: 'post',
+              headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+              body: JSON.stringify(graphQLParams),
+            }).then(response => response.json());
+          }
+          ReactDOM.render(
+            React.createElement(GraphiQL, { fetcher: graphQLFetcher }),
+            document.getElementById('graphiql'),
+          );
+        </script>
+      </body>
+    </html>
+    `;
+    res.setHeader("Content-Type", "text/html");
+    res.send(html);
+  }
+});
+
+const port = process.env.PORT || 3000;
+
+// Start server
+app.listen(port, () => {
+  console.info(`🚀 Rendini Mashup GraphQL API running at http://localhost:${port}/graphql`);
+  console.info(
+    `🚀 Rendini Mashup GraphiQL interface available at http://localhost:${port}/graphiql`
+  );
+  console.info("Port numbers are internal to the container and may differ on the host.");
 });

@@ -29,7 +29,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc -w & nodemon --watch dist dist/server.js",
+    "dev": "tsc & nodemon --watch dist dist/server.js",
     "start": "node dist/server.js"
   },
   "type": "module",

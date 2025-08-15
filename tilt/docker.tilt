@@ -8,6 +8,17 @@ load("command.tilt", "command_factory")
 load("filesystem.tilt", "cfs")
 load("resources.tilt", "resource_factory")
 
+def __is_debug_mode():
+  """Checks if the debug mode is enabled.
+
+  Returns:
+    True if debug mode is enabled, otherwise False.
+  """
+
+  debug_value = os.getenv('DEBUG', "0")
+
+  return debug_value == "1" or debug_value == "true"
+
 def __create_builder(
   name="buildx-builder",
   resource_name=None,
@@ -112,6 +123,9 @@ def __create_builder(
     Returns:
       The current instance of the factory with the added resource labels.
     """
+
+    if __is_debug_mode():
+      print("DEBUG: Adding resource labels:", resource_labels)
 
     _executable_resource.add_resource_labels(*resource_labels)
     _exec_resource.add_resource_labels(*resource_labels)

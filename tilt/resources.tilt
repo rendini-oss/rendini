@@ -99,9 +99,10 @@ def __create_tilt_resource(resource_name, command_builder, working_dir=None):
 
     if __is_debug_mode():
       print(
-        "DEBUG: Creating Tilt resource '%s'... (Dependencies: %s)" % (
+        "DEBUG: Creating Tilt resource '%s'... (Dependencies: %s, Labels: %s)" % (
           resource_name,
-          __resource_dependencies
+          __resource_dependencies,
+          __resource_labels,
         )
       )
 
@@ -111,6 +112,7 @@ def __create_tilt_resource(resource_name, command_builder, working_dir=None):
       deps=__file_dependencies,
       dir=local_working_dir,
       ignore=__ignore_file_dependencies,
+      labels=__resource_labels,
       resource_deps=__resource_dependencies,
     )
 

@@ -25,6 +25,18 @@ target "node-base" {
     tags = ["localhost/rendini/node:latest"]
 }
 
+# This target builds the Rendini Mashup container.
+target "mashup" {
+    cache-from = ["type=local,src=${BUILDKIT_CACHE_DIR}/mashup/latest"]
+    cache-to = ["type=local,dest=${BUILDKIT_CACHE_DIR}/mashup/latest"]
+    context = "./mashup"
+    contexts = {
+      base = "target:node-base"
+    }
+    dockerfile = "./containerfile"
+    tags = ["localhost/rendini/mashup:latest"]
+}
+
 # This target builds the Rendini Nunjucks rendering container.
 target "render-nunjucks" {
     cache-from = ["type=local,src=${BUILDKIT_CACHE_DIR}/render-nunjucks/latest"]
@@ -51,5 +63,5 @@ target "render-vue" {
 
 # This target builds all of the Rendini containers.
 group "default" {
-    targets = ["node-base","render-nunjucks","render-vue"]
+    targets = ["node-base","mashup","render-nunjucks","render-vue"]
 }

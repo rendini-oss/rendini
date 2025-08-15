@@ -34,6 +34,9 @@ up: start
 stop:
 	@./stop.sh
 
+.PHONY: down
+down: stop
+
 .PHONY: restart
 restart: stop start
 
@@ -45,6 +48,6 @@ clean: stop
 
 .PHONY: reset
 reset: clean
-	@echo "Resetting Rendini..."
+	@echo "Resetting Rendini...DEFAULT_GOAL"
 	@rm --recursive --force ./renders/node/nunjucks/node_modules
 	@echo "Successfully reset Rendini."

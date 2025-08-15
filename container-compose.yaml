@@ -2,6 +2,21 @@
 # Copyright (c) 2025 Rendini Labs.
 
 services:
+  mashup:
+    image: localhost/rendini/mashup:latest
+    container_name: rendini-mashup
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    ports:
+      - "3000:3000"
+    tty: true
+    stdin_open: true
+    restart: "no"
+    labels:
+      # Removes container when stopped (similar to --rm flag)
+      - "com.docker.compose.rm=true"
+
   render-nunjucks:
     image: localhost/rendini/render-nunjucks:latest
     container_name: rendini-render-nunjucks
